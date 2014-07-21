@@ -1,0 +1,39 @@
+# Copyright 2014 by Cloudsoft Corporation Limited
+
+id: campsite
+name: "Campsite Application"
+origin: "http://github.com/borooklyncentral/campsite/"
+locations:
+- jclouds:aws-ec2:eu-west-1
+services:
+- serviceType: brooklyn.entity.database.MySqlNode
+  id: mysql
+  name: "Database"
+  brooklyn.config:
+    creationScriptUrl: classpath://brooklyn/campsite/create-campsite-user.sql
+- serviceType: brooklyn.entity.messaging.RabbitBroker
+  id: rabbit
+  name: "Queue"
+- serviceType: brooklyn.campsite.CampsiteWebapp
+  id: campsite
+  name: "Campsite"
+  brooklyn.config:
+    provisioningProperties:
+      os64bit: true
+      minRam: 7000
+    httpPort: 80
+    objectStorage: AWSObjectStorage
+    queueService: RabbitMQ
+    s3AccessKey: XXXX
+    s3SecretKey: XXXXXXXX
+    s3BucketName: "campsite-public"
+    sPrivateBucketName: "campsite-public"
+    databaseHost: component("mysql").attributeWhenReady("host.name")
+    databasePort: component("mysql").attributeWhenReady("mysql.port")
+    databaseUser: "campsite"
+    databasePassword: "p4ssw0rd"
+    rabbitHost: component("rabbit").attributeWhenReady("host.name")
+    rabbitPort: component("rabbit").attributeWhenReady("amqp.port")
+- serviceType: brooklyn.entity.webapp.nodejs.NodeJsWebAppSoftwareProcess
+  id: nodejs
+  name: "API"

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2014 by Cloudsoft Corporation Limited -->
+<configuration>
+    <property name="logging.basename" scope="context" value="brooklyn-campsite" />
+    <include resource="logback-main.xml" />
+    <include resource="brooklyn/logback-logger-debug-jclouds.xml" />
+</configuration>

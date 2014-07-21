@@ -1,0 +1,20 @@
+[#ftl]
+<VirtualHost *:${entity.httpPort?c}>
+
+    ServerAdmin webmaster@${entity.siteDomainName}
+
+    ServerName  ${entity.siteDomainName}
+    ServerAlias www.${entity.siteDomainName}
+
+    DocumentRoot    "${driver.baseDir}/web"
+    ErrorLog        "${driver.baseDir}/logs/error.log"
+    CustomLog       "${driver.baseDir}/logs/access.log" common
+
+    DirectoryIndex  app_dev.php
+
+    <Directory "${driver.baseDir}/web">
+        AllowOverride All
+        Options FollowSymLinks
+    </Directory>
+
+</VirtualHost>

@@ -1,0 +1,19 @@
+# Used for server-specific information, e.g. to enable the symfony default login method:
+
+security:
+    firewalls:
+        main:
+            form_login:
+                check_path: /login_check
+
+parameters:
+    # false = CEVO login, true = local login (including API authentication)
+    local_auth: true
+
+# To let the i18n router know what domain "en" locale points to, for example
+jms_i18n_routing:
+    default_locale: en
+    locales: [en]
+    strategy: custom
+    hosts:
+        en: staging.marketingcamp.org
