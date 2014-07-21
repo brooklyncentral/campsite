@@ -1,4 +1,0 @@
-campsite
-========
-
-Campsite Application Blueprint
