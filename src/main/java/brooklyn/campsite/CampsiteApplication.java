@@ -4,6 +4,7 @@
 package brooklyn.campsite;
 
 import static brooklyn.event.basic.DependentConfiguration.attributeWhenReady;
+import brooklyn.campsite.entity.CampsiteApi;
 import brooklyn.campsite.entity.CampsiteConfig;
 import brooklyn.campsite.entity.CampsiteWebapp;
 import brooklyn.catalog.Catalog;
@@ -102,9 +103,11 @@ public class CampsiteApplication extends AbstractApplication implements Startabl
 
         CampsiteWebapp campsite = addChild(campspec);
 
-//        NodeJsWebAppSoftwareProcess api = addChild(EntitySpec.create(NodeJsWebAppSoftwareProcess.class)
-//                .configure(NodeJsWebAppService.APP_FILE, "api.js")
-//                .configure(NodeJsWebAppService.APP_ARCHIVE_URL, "https://  brooklyn-campsire/node-api.tar.gz"));
+        CampsiteApi api = addChild(EntitySpec.create(CampsiteApi.class)
+                .configure(CampsiteConfig.DATABASE_HOST, attributeWhenReady(mysql, Attributes.HOSTNAME))
+                .configure(CampsiteConfig.DATABASE_PORT, attributeWhenReady(mysql, MySqlNode.MYSQL_PORT))
+                .configure(CampsiteConfig.DATABASE_USER, "campsite")
+                .configure(CampsiteConfig.DATABASE_PASSWORD, "p4ssw0rd"));
 
     }
 

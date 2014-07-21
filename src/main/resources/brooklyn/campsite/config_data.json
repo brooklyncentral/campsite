@@ -1,0 +1,13 @@
+[#ftl]
+{
+    "db_config" : {
+        "client" : "mysql",
+        "connection" : {
+            "host" : "${databaseHost}",
+            "user" : "${databaseUser}",
+            "password" : "${databasePassword}"
+            "database" : "campsite",
+            "charset" : "UTF8MB4_GENERAL_CI"
+        }
+    }
+}

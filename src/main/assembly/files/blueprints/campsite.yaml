@@ -34,6 +34,11 @@ services:
     databasePassword: "p4ssw0rd"
     rabbitHost: component("rabbit").attributeWhenReady("host.name")
     rabbitPort: component("rabbit").attributeWhenReady("amqp.port")
-- serviceType: brooklyn.entity.webapp.nodejs.NodeJsWebAppSoftwareProcess
-  id: nodejs
+- serviceType: brooklyn.campsite.CampsiteWebapp
+  id: api
   name: "API"
+  brooklyn.config:
+    databaseHost: component("mysql").attributeWhenReady("host.name")
+    databasePort: component("mysql").attributeWhenReady("mysql.port")
+    databaseUser: "campsite"
+    databasePassword: "p4ssw0rd"
