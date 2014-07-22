@@ -25,7 +25,8 @@ import brooklyn.util.collections.MutableMap;
  * Clustered Diffusion servers.
  */
 @Catalog(name="Campsite",
-        description="Campsite Application.")
+        description="Campsite Application.",
+        iconUrl="classpath://logo-campsite.png")
 public class CampsiteApplication extends AbstractApplication implements StartableApplication {
 
     @CatalogConfig(label ="Object storage (HpObjectStorage or AWSObjectStorage)", priority = 62)
