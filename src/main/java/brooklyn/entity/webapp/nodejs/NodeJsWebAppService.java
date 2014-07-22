@@ -36,4 +36,6 @@ public interface NodeJsWebAppService extends SoftwareProcess, WebAppService {
     ConfigKey<List<String>> NODE_PACKAGE_LIST = ConfigKeys.newConfigKey(new TypeToken<List<String>>() { },
             "nodejs.packages", "The NPM packages to install", ImmutableList.<String>of());
 
+    ConfigKey<String> SERVICE_UP_PATH = ConfigKeys.newStringConfigKey("nodejs.serviceUp.path", "Path to use when checking the NodeJS application is running", "/");
+
 }

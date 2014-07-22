@@ -4,6 +4,7 @@ import com.google.common.base.Predicates;
 import com.google.common.net.HostAndPort;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
+import brooklyn.entity.webapp.WebAppServiceConstants;
 import brooklyn.entity.webapp.WebAppServiceMethods;
 import brooklyn.event.feed.http.HttpFeed;
 import brooklyn.event.feed.http.HttpPollConfig;
@@ -19,11 +20,12 @@ public class NodeJsWebAppServiceImpl extends SoftwareProcessImpl implements Node
         super.connectSensors();
 
         HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(this, getAttribute(HTTP_PORT));
-        String nodeJsUrl = String.format("http://%s:%d/", accessible.getHostText(), accessible.getPort());
+        String nodeJsUrl = String.format("http://%s:%d", accessible.getHostText(), accessible.getPort());
         httpFeed = HttpFeed.builder()
                 .entity(this)
                 .baseUri(nodeJsUrl)
                 .poll(new HttpPollConfig<Boolean>(SERVICE_UP)
+                        .suburl(getConfig(NodeJsWebAppService.SERVICE_UP_PATH))
                         .checkSuccess(Predicates.alwaysTrue())
                         .onSuccess(HttpValueFunctions.responseCodeEquals(200))
                         .setOnException(false))
