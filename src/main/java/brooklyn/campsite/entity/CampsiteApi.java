@@ -19,6 +19,7 @@ public interface CampsiteApi extends NodeJsWebAppService {
     ConfigKey<String> APP_NAME = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.APP_NAME, "node-api");
     ConfigKey<String> APP_COMMAND = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.APP_COMMAND, "forever start");
     ConfigKey<List<String>> NODE_PACKAGE_LIST = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.NODE_PACKAGE_LIST, ImmutableList.of("forever", "restify", "knex", "mysql", "underscore"));
+    ConfigKey<String> SERVICE_UP_PATH = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.SERVICE_UP_PATH, "/users");
 
     ConfigKey<Integer> API_PORT = ConfigKeys.newIntegerConfigKey("campsite.api.port", "Campsite API  port number", 3000);
 
