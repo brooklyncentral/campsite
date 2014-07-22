@@ -4,7 +4,6 @@ import com.google.common.base.Predicates;
 import com.google.common.net.HostAndPort;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
-import brooklyn.entity.webapp.WebAppServiceConstants;
 import brooklyn.entity.webapp.WebAppServiceMethods;
 import brooklyn.event.feed.http.HttpFeed;
 import brooklyn.event.feed.http.HttpPollConfig;
