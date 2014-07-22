@@ -113,8 +113,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                         "php app/console themes:install web --symlink",
                         "php app/console assets:install web --symlink",
                         "php app/console assetic:dump --env=prod --no-debug",
-                        "php app/console cache:clear --env=prod --no-debug",
-                        // "./updateThemes.sh prod",
+                        "php app/console cache:clear --env=prod --no-debug --no-warmup",
                         "./misc_scripts/updateFeedbackTables.sh")
                 .execute();
     }
