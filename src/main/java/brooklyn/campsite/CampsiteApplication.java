@@ -104,6 +104,7 @@ public class CampsiteApplication extends AbstractApplication implements Startabl
         CampsiteWebapp campsite = addChild(campspec);
 
         CampsiteApi api = addChild(EntitySpec.create(CampsiteApi.class)
+                .configure(CampsiteApi.CAMPSITE_WEBAPP, campsite)
                 .configure(CampsiteConfig.DATABASE_HOST, attributeWhenReady(mysql, Attributes.HOSTNAME))
                 .configure(CampsiteConfig.DATABASE_PORT, attributeWhenReady(mysql, MySqlNode.MYSQL_PORT))
                 .configure(CampsiteConfig.DATABASE_USER, "campsite")
