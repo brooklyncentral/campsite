@@ -2,6 +2,7 @@ package brooklyn.campsite.entity;
 
 import java.util.Map;
 
+import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.webapp.nodejs.NodeJsWebAppService;
 import brooklyn.entity.webapp.nodejs.NodeJsWebAppSshDriver;
 import brooklyn.location.basic.SshMachineLocation;
@@ -37,7 +38,7 @@ public class CampsiteApiSshDriver extends NodeJsWebAppSshDriver implements Camps
                 .updateTaskAndFailOnNonZeroResultCode()
                 .body.append(
                         BashCommands.sudo(String.format("sed -i.bak -e 's/var basePort = [0-9]*;/var basePort = %d;/g' %s",
-                                getEntity().getAttribute(CampsiteApi.API_PORT),
+                                getEntity().getAttribute(Attributes.HTTP_PORT),
                                 Os.mergePaths(getRunDir(), "node-api", "common.js"))))
                 .execute();
     }
@@ -45,7 +46,9 @@ public class CampsiteApiSshDriver extends NodeJsWebAppSshDriver implements Camps
     @Override
     public boolean isRunning() {
         return newScript(MutableMap.of(USE_PID_FILE, false), CHECK_RUNNING)
-                .body.append(BashCommands.sudo("forever list | grep --quiet " + getEntity().getConfig(NodeJsWebAppService.APP_FILE)))
+                .body.append(
+                        BashCommands.sudo("forever list > /tmp/list.txt"),
+                        BashCommands.sudo("forever list | grep --quiet " + getEntity().getConfig(NodeJsWebAppService.APP_FILE)))
                 .execute() == 0;
     }
 

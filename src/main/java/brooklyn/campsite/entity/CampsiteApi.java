@@ -7,8 +7,6 @@ import brooklyn.entity.Entity;
 import brooklyn.entity.basic.ConfigKeys;
 import brooklyn.entity.proxying.ImplementedBy;
 import brooklyn.entity.webapp.nodejs.NodeJsWebAppService;
-import brooklyn.event.basic.PortAttributeSensorAndConfigKey;
-import brooklyn.location.basic.PortRanges;
 import brooklyn.util.flags.SetFromFlag;
 
 import com.google.common.collect.ImmutableList;
@@ -20,9 +18,9 @@ public interface CampsiteApi extends NodeJsWebAppService {
     ConfigKey<String> APP_FILE = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.APP_FILE, "api.js");
     ConfigKey<String> APP_NAME = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.APP_NAME, "node-api");
     ConfigKey<String> APP_COMMAND = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.APP_COMMAND, "forever start");
-    ConfigKey<List<String>> NODE_PACKAGE_LIST = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.NODE_PACKAGE_LIST, ImmutableList.of("forever", "restify", "knex"));
+    ConfigKey<List<String>> NODE_PACKAGE_LIST = ConfigKeys.newConfigKeyWithDefault(NodeJsWebAppService.NODE_PACKAGE_LIST, ImmutableList.of("forever", "restify", "knex", "mysql", "underscore"));
 
-    PortAttributeSensorAndConfigKey API_PORT = ConfigKeys.newPortSensorAndConfigKey("campsite.api.port", "Camp[site API  port number", PortRanges.fromInteger(3000));
+    ConfigKey<Integer> API_PORT = ConfigKeys.newIntegerConfigKey("campsite.api.port", "Campsite API  port number", 3000);
 
     ConfigKey<Entity> CAMPSITE_WEBAPP = ConfigKeys.newConfigKey(Entity.class, "campsite.webapp", "Campsite web application");
 
