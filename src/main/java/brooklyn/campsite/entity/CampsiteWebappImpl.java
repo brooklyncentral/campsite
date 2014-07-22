@@ -8,6 +8,8 @@ import java.util.Map;
 import org.jclouds.compute.domain.OsFamily;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
+import brooklyn.entity.webapp.WebAppServiceConstants;
+import brooklyn.entity.webapp.WebAppServiceMethods;
 import brooklyn.event.feed.http.HttpFeed;
 import brooklyn.event.feed.http.HttpPollConfig;
 import brooklyn.event.feed.http.HttpValueFunctions;
@@ -24,11 +26,6 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
     private transient HttpFeed httpFeed;
 
     @Override
-    public void init() {
-        // TODO
-    }
-
-    @Override
     public Class getDriverInterface() {
         return CampsiteWebappDriver.class;
     }
@@ -43,21 +40,31 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
         super.connectSensors();
 
         HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(this, getAttribute(HTTP_PORT));
-        String diffusionUrl = String.format("http://%s:%d/", accessible.getHostText(), accessible.getPort());
+        String webappUrl = String.format("http://%s:%d/", accessible.getHostText(), accessible.getPort());
+        setAttribute(WebAppServiceConstants.ROOT_URL, webappUrl);
         httpFeed = HttpFeed.builder()
                 .entity(this)
-                .baseUri(diffusionUrl)
+                .baseUri(webappUrl)
                 .poll(new HttpPollConfig<Boolean>(SERVICE_UP)
                         .checkSuccess(Predicates.alwaysTrue())
                         .onSuccess(HttpValueFunctions.responseCodeEquals(200))
                         .setOnException(false))
                 .build();
+
+        WebAppServiceMethods.connectWebAppServerPolicies(this);
     }
 
     @Override
     public void disconnectSensors() {
         if (httpFeed != null) httpFeed.stop();
         super.disconnectSensors();
+    }
+
+    @Override
+    protected void doStop() {
+        super.doStop();
+        setAttribute(REQUESTS_PER_SECOND_LAST, 0D);
+        setAttribute(REQUESTS_PER_SECOND_IN_WINDOW, 0D);
     }
 
     @Override

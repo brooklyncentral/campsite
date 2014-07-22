@@ -42,4 +42,5 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
     ConfigKey<String> SITE_DOMAIN_NAME = ConfigKeys.newStringConfigKey("campsite.domainName", "Campsite site domain name", "campsite.org");
 
     String getSiteDomainName();
+
 }
