@@ -6,15 +6,15 @@ origin: "http://github.com/borooklyncentral/campsite/"
 locations:
 - jclouds:aws-ec2:eu-west-1
 services:
-- serviceType: brooklyn.entity.database.MySqlNode
+- serviceType: brooklyn.entity.database.mysql.MySqlNode
   id: mysql
   name: "Database"
   brooklyn.config:
     creationScriptUrl: classpath://brooklyn/campsite/create-campsite-user.sql
-- serviceType: brooklyn.entity.messaging.RabbitBroker
+- serviceType: brooklyn.entity.messaging.rabbit.RabbitBroker
   id: rabbit
   name: "Queue"
-- serviceType: brooklyn.campsite.CampsiteWebapp
+- serviceType: brooklyn.campsite.entity.CampsiteWebapp
   id: campsite
   name: "Campsite"
   brooklyn.config:
@@ -24,21 +24,21 @@ services:
     httpPort: 80
     objectStorage: AWSObjectStorage
     queueService: RabbitMQ
-    s3AccessKey: XXXX
-    s3SecretKey: XXXXXXXX
+    s3AccessKey: "XXXX"
+    s3SecretKey: "XXXXXXXX"
     s3BucketName: "campsite-public"
     sPrivateBucketName: "campsite-public"
-    databaseHost: component("mysql").attributeWhenReady("host.name")
-    databasePort: component("mysql").attributeWhenReady("mysql.port")
+    databaseHost: $brooklyn:component("mysql").attributeWhenReady("host.name")
+    databasePort: $brooklyn:component("mysql").attributeWhenReady("mysql.port")
     databaseUser: "campsite"
     databasePassword: "p4ssw0rd"
-    rabbitHost: component("rabbit").attributeWhenReady("host.name")
-    rabbitPort: component("rabbit").attributeWhenReady("amqp.port")
-- serviceType: brooklyn.campsite.CampsiteApi
+    rabbitHost: $brooklyn:component("rabbit").attributeWhenReady("host.name")
+    rabbitPort: $brooklyn:component("rabbit").attributeWhenReady("amqp.port")
+- serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
   name: "API"
   brooklyn.config:
-    databaseHost: component("mysql").attributeWhenReady("host.name")
-    databasePort: component("mysql").attributeWhenReady("mysql.port")
+    databaseHost: $brooklyn:component("mysql").attributeWhenReady("host.name")
+    databasePort: $brooklyn:component("mysql").attributeWhenReady("mysql.port")
     databaseUser: "campsite"
     databasePassword: "p4ssw0rd"

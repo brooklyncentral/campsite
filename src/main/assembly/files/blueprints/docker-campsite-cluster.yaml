@@ -6,12 +6,12 @@ origin: "http://github.com/borooklyncentral/campsite/"
 locations:
 - my-docker-cloud
 services:
-- serviceType: brooklyn.entity.database.MySqlNode
+- serviceType: brooklyn.entity.database.mysql.MySqlNode
   id: mysql
   name: "Database"
   brooklyn.config:
     creationScriptUrl: classpath://brooklyn/campsite/create-campsite-user.sql
-- serviceType: brooklyn.entity.messaging.RabbitBroker
+- serviceType: brooklyn.entity.messaging.rabbit.RabbitBroker
   id: rabbit
   name: "Queue"
 - serviceType: brooklyn.entity.webapp.ControlledDynamicWebAppCluster
@@ -19,28 +19,22 @@ services:
   name: "Campsite Cluster"
   brooklyn.config:
     initialSize: 1
-    proxy.http.port: "8000+"
+    proxy.http.port: "8080"
     memberSpec:
       $brooklyn:entitySpec:
-        type: brooklyn.campsite.CampsiteWebapp
-        name: "Campsite"
+        type: brooklyn.campsite.entity.CampsiteWebapp
         brooklyn.config:
-          provisioningProperties:
-            os64bit: true
-            minRam: 7000
-          httpPort: "8080+"
+          httpPort: "80"
           objectStorage: AWSObjectStorage
           queueService: RabbitMQ
-          s3AccessKey: XXXX
-          s3SecretKey: XXXXXXXX
+          s3AccessKey: "XXXX"
+          s3SecretKey: "XXXXXXXX"
           s3BucketName: "campsite-public"
           sPrivateBucketName: "campsite-public"
-          databaseHost: component("mysql").attributeWhenReady("host.name")
-          databasePort: component("mysql").attributeWhenReady("mapped.mysql.port")
+          databaseHostAndPort: $brooklyn:component("mysql").attributeWhenReady("mapped.mysql.port")
           databaseUser: "campsite"
           databasePassword: "p4ssw0rd"
-          rabbitHost: component("rabbit").attributeWhenReady("host.name")
-          rabbitPort: component("rabbit").attributeWhenReady("mapped.amqp.port")
+          rabbitHostAndPort: $brooklyn:component("rabbit").attributeWhenReady("mapped.amqp.port")
     controlleddynamicwebappcluster.webClusterSpec:
       $brooklyn:entitySpec:
         type: brooklyn.entity.webapp.DynamicWebAppCluster
@@ -53,11 +47,11 @@ services:
         type: brooklyn.entity.proxy.nginx.NginxController
         brooklyn.config:
           member.sensor.hostandport: "mapped.http.port"
-- serviceType: brooklyn.campsite.CampsiteApi
+- serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
   name: "API"
   brooklyn.config:
-    databaseHost: component("mysql").attributeWhenReady("host.name")
-    databasePort: component("mysql").attributeWhenReady("mapped.mysql.port")
+    campsite.webapp: $brooklyn:component("campsite-cluster")
+    databaseHostAndPort: $brooklyn:component("mysql").attributeWhenReady("mapped.mysql.port")
     databaseUser: "campsite"
     databasePassword: "p4ssw0rd"

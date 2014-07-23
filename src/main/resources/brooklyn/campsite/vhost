@@ -3,7 +3,8 @@
 
     ServerAdmin webmaster@${entity.siteDomainName}
 
-    ServerName  ${entity.siteDomainName}
+    ServerName ${driver.hostname}
+    ServerAlias ${entity.siteDomainName}
     ServerAlias www.${entity.siteDomainName}
 
     DocumentRoot    "${driver.baseDir}/web"

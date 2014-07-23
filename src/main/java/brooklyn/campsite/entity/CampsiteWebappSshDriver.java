@@ -21,6 +21,7 @@ import brooklyn.util.text.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.net.HostAndPort;
 
 public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver implements CampsiteWebappDriver {
 
@@ -142,13 +143,33 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
     }
 
     @Override
+    public HostAndPort getDatabaseHostAndPort() {
+        String databaseHostAndPort = getEntity().getConfig(CampsiteConfig.DATABASE_HOST_AND_PORT);
+        if (Strings.isNonBlank(databaseHostAndPort)) {
+            return HostAndPort.fromString(databaseHostAndPort);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public String getDatabaseHost() {
-        return getEntity().getConfig(CampsiteConfig.DATABASE_HOST);
+        HostAndPort endpoint = getDatabaseHostAndPort();
+        if (endpoint != null) {
+            return endpoint.getHostText();
+        } else {
+            return getEntity().getConfig(CampsiteConfig.DATABASE_HOST);
+        }
     }
 
     @Override
     public Integer getDatabasePort() {
-        return getEntity().getConfig(CampsiteConfig.DATABASE_PORT);
+        HostAndPort endpoint = getDatabaseHostAndPort();
+        if (endpoint != null) {
+            return endpoint.getPort();
+        } else {
+            return getEntity().getConfig(CampsiteConfig.DATABASE_PORT);
+        }
     }
 
     @Override
@@ -237,13 +258,33 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
     }
 
     @Override
+    public HostAndPort getRabbitHostAndPort() {
+        String databaseHostAndPort = getEntity().getConfig(CampsiteConfig.RABBIT_HOST_AND_PORT);
+        if (Strings.isNonBlank(databaseHostAndPort)) {
+            return HostAndPort.fromString(databaseHostAndPort);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public String getRabbitHost() {
-        return getEntity().getConfig(CampsiteConfig.RABBIT_HOST);
+        HostAndPort endpoint = getRabbitHostAndPort();
+        if (endpoint != null) {
+            return endpoint.getHostText();
+        } else {
+            return getEntity().getConfig(CampsiteConfig.RABBIT_HOST);
+        }
     }
 
     @Override
     public Integer getRabbitPort() {
-        return getEntity().getConfig(CampsiteConfig.RABBIT_PORT);
+        HostAndPort endpoint = getRabbitHostAndPort();
+        if (endpoint != null) {
+            return endpoint.getPort();
+        } else {
+            return getEntity().getConfig(CampsiteConfig.RABBIT_PORT);
+        }
     }
 
     @Override

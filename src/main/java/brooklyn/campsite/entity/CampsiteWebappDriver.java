@@ -3,10 +3,13 @@
  */
 package brooklyn.campsite.entity;
 
+import com.google.common.net.HostAndPort;
+
 import brooklyn.entity.basic.SoftwareProcessDriver;
 
 public interface CampsiteWebappDriver extends SoftwareProcessDriver {
 
+    HostAndPort getDatabaseHostAndPort();
     String getDatabaseHost();
     Integer getDatabasePort();
     String getDatabaseUser();
@@ -26,6 +29,7 @@ public interface CampsiteWebappDriver extends SoftwareProcessDriver {
     String getSendgridUsername();
     String getSendgridPassword();
     String getQueueService();
+    HostAndPort getRabbitHostAndPort();
     String getRabbitHost();
     Integer getRabbitPort();
     String getRabbitUser();

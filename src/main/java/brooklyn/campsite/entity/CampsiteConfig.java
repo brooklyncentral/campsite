@@ -9,6 +9,9 @@ import brooklyn.util.flags.SetFromFlag;
  */
 public interface CampsiteConfig {
 
+    @SetFromFlag("databaseHostAndPort")
+    ConfigKey<String> DATABASE_HOST_AND_PORT = ConfigKeys.newStringConfigKey("campsite.database.hostandport", "MySQL database host and port");
+
     @SetFromFlag("databaseHost")
     ConfigKey<String> DATABASE_HOST = ConfigKeys.newStringConfigKey("campsite.database.host", "MySQL database host", "localhost");
 
@@ -65,6 +68,9 @@ public interface CampsiteConfig {
 
     @SetFromFlag("queueService")
     ConfigKey<String> QUEUE_SERVICE = ConfigKeys.newStringConfigKey("campsite.queueService", "Queue service (RabbitMQ, AWS_SQS or HPCloud)", "AWS_SQS");
+
+    @SetFromFlag("rabbitHostAndPort")
+    ConfigKey<String> RABBIT_HOST_AND_PORT = ConfigKeys.newStringConfigKey("campsite.rabbit.hostandport", "RabbitMQ hostname and port number");
 
     @SetFromFlag("rabbitHost")
     ConfigKey<String> RABBIT_HOST = ConfigKeys.newStringConfigKey("campsite.rabbit.host", "RabbitMQ hostname", "localhost");

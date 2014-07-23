@@ -4,6 +4,7 @@
         "client" : "mysql",
         "connection" : {
             "host" : "${databaseHost}",
+            "port" : "${databasePort?c}",
             "user" : "${databaseUser}",
             "password" : "${databasePassword}",
             "database" : "campsite",

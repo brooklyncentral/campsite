@@ -25,6 +25,9 @@ public interface CampsiteApi extends NodeJsWebAppService {
 
     ConfigKey<Entity> CAMPSITE_WEBAPP = ConfigKeys.newConfigKey(Entity.class, "campsite.webapp", "Campsite web application");
 
+    @SetFromFlag("databaseHostAndPort")
+    ConfigKey<String> DATABASE_HOST_AND_PORT = CampsiteConfig.DATABASE_HOST_AND_PORT;
+
     @SetFromFlag("databaseHost")
     ConfigKey<String> DATABASE_HOST = CampsiteConfig.DATABASE_HOST;
 

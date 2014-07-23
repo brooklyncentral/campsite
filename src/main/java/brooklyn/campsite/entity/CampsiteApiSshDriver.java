@@ -2,6 +2,8 @@ package brooklyn.campsite.entity;
 
 import java.util.Map;
 
+import com.google.common.net.HostAndPort;
+
 import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.webapp.nodejs.NodeJsWebAppService;
 import brooklyn.entity.webapp.nodejs.NodeJsWebAppSshDriver;
@@ -11,6 +13,7 @@ import brooklyn.util.collections.MutableMap;
 import brooklyn.util.os.Os;
 import brooklyn.util.ssh.BashCommands;
 import brooklyn.util.stream.Streams;
+import brooklyn.util.text.Strings;
 import brooklyn.util.text.TemplateProcessor;
 
 public class CampsiteApiSshDriver extends NodeJsWebAppSshDriver implements CampsiteApiDriver {
@@ -24,11 +27,19 @@ public class CampsiteApiSshDriver extends NodeJsWebAppSshDriver implements Camps
         super.customize();
 
         Map<String,Object> substitutions = MutableMap.<String,Object>builder()
-                .put("databaseHost", getEntity().getConfig(CampsiteApi.DATABASE_HOST))
-                .put("databasePort", getEntity().getConfig(CampsiteApi.DATABASE_PORT)) // TODO
                 .put("databaseUser", getEntity().getConfig(CampsiteApi.DATABASE_USER))
                 .put("databasePassword", getEntity().getConfig(CampsiteApi.DATABASE_PASSWORD))
                 .build();
+
+        String databaseHostAndPort = getEntity().getConfig(CampsiteApi.DATABASE_HOST_AND_PORT);
+        if (Strings.isNonBlank(databaseHostAndPort)) {
+            HostAndPort endpoint = HostAndPort.fromString(databaseHostAndPort);
+            substitutions.put("databaseHost", endpoint.getHostText());
+            substitutions.put("databasePort", endpoint.getPort());
+        } else {
+            substitutions.put("databaseHost", getEntity().getConfig(CampsiteApi.DATABASE_HOST));
+            substitutions.put("databasePort", getEntity().getConfig(CampsiteApi.DATABASE_PORT));
+        }
 
         String template = ResourceUtils.create().getResourceAsString(getEntity().getConfig(CampsiteApi.CONFIG_JSON_TEMPLATE_URL));
         String contents = TemplateProcessor.processTemplateContents(template, substitutions);
