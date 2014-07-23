@@ -17,6 +17,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <brooklyn.version>0.7.0-SNAPSHOT</brooklyn.version>
+        <clocker.version>0.6.0-SNAPSHOT</clocker.version>
         <logback.version>1.0.7</logback.version>
     </properties>
 
@@ -25,6 +26,11 @@
             <groupId>io.brooklyn</groupId>
             <artifactId>brooklyn-all</artifactId>
             <version>${brooklyn.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.brooklyn.clocker</groupId>
+            <artifactId>brooklyn-clocker-examples</artifactId>
+            <version>${clocker.version}</version>
         </dependency>
 
         <dependency>
