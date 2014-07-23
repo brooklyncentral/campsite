@@ -9,7 +9,6 @@ import java.util.concurrent.Semaphore;
 import org.jclouds.compute.domain.OsFamily;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
-import brooklyn.entity.webapp.DynamicWebAppCluster;
 import brooklyn.entity.webapp.WebAppServiceConstants;
 import brooklyn.entity.webapp.WebAppServiceMethods;
 import brooklyn.event.feed.http.HttpFeed;
@@ -91,7 +90,11 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
         return flags;
     }
 
+    @Override
     public Integer getHttpPort() { return getAttribute(HTTP_PORT); }
+
+    @Override
+    public Integer getHttpsPort() { return getAttribute(HTTPS_PORT); }
 
     @Override
     public String getSiteDomainName() { return getConfig(SITE_DOMAIN_NAME); }

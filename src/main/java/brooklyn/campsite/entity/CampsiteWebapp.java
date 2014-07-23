@@ -35,6 +35,11 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
             "campsite.vhost.url", "Campsite vhost template file (in freemarker format)", 
             "classpath://brooklyn/campsite/vhost");
 
+    @SetFromFlag("vhostTemplate")
+    AttributeSensorAndConfigKey<String, String> VHOST_SSL_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
+            "campsite.vhost.url", "Campsite SSL vhost template file (in freemarker format)", 
+            "classpath://brooklyn/campsite/vhost.ssl");
+
     @SetFromFlag("timezone")
     ConfigKey<String> TIMEZONE = ConfigKeys.newStringConfigKey("campsite.timezone", "Campsite site time zone", "Europe/London");
 
@@ -43,6 +48,9 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
 
     AttributeSensor<Boolean> CLUSTERED = Sensors.newBooleanSensor("campsite.webapp.clustered", "Set if this is a clustered Campsite webapp");
     AttributeSensor<Boolean> FIRST = Sensors.newBooleanSensor("campsite.webapp.first", "Set if this is the first Campsite webapp in a cluster");
+
+    Integer getHttpPort();
+    Integer getHttpsPort();
 
     String getSiteDomainName();
 

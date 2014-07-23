@@ -11,7 +11,7 @@
     ErrorLog        "${driver.baseDir}/logs/error.log"
     CustomLog       "${driver.baseDir}/logs/access.log" common
 
-    DirectoryIndex  app.php
+    DirectoryIndex  app_dev.php
 
     <Directory "${driver.baseDir}/web">
         AllowOverride All
