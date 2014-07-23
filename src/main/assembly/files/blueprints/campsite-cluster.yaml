@@ -1,7 +1,7 @@
 # Copyright 2014 by Cloudsoft Corporation Limited
 
-id: campsite
-name: "Campsite Application"
+id: campsite-cluster-application
+name: "Campsite Cluster Application"
 origin: "http://github.com/borooklyncentral/campsite/"
 locations:
 - jclouds:hpcloud-compute:
