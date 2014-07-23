@@ -22,6 +22,7 @@ services:
         type: brooklyn.campsite.entity.CampsiteWebapp
         brooklyn.config:
           httpPort: 80
+          httpsPort: 443
           objectStorage: AWSObjectStorage
           queueService: AWS_SQS
           s3AccessKey: "XXXX"
