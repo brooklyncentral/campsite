@@ -32,7 +32,6 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
     public void init() {
         super.init();
 
-        setAttribute(CLUSTERED, getParent().getEntityType().getName().endsWith("Cluster"));
         setAttribute(FIRST, semaphore.tryAcquire(1));
     }
 
@@ -49,6 +48,8 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
     @Override
     protected void connectSensors() {
         super.connectSensors();
+
+        setAttribute(CLUSTERED, getParent().getEntityType().getName().endsWith("Cluster"));
 
         HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(this, getAttribute(HTTP_PORT));
         String webappUrl = String.format("http://%s:%d/", accessible.getHostText(), accessible.getPort());
