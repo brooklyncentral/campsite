@@ -55,7 +55,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
             throw new IllegalStateException("At least one of Git or archive URL must be set");
         }
 
-        commands.add(BashCommands.installPackage("nc git-core apache2 libapache2-mod-php5 php5-intl php-apc php5-curl php5-gd php5-mysql php5-mcrypt memcached php5-memcache php5-memcached php5-sqlite ftp-upload ncurses-term php5-xdebug mysql-client php-pear ssl-cert"
+        commands.add(BashCommands.installPackage("netcat git-core apache2 libapache2-mod-php5 php5-intl php-apc php5-curl php5-gd php5-mysql php5-mcrypt memcached php5-memcache php5-memcached php5-sqlite ftp-upload ncurses-term php5-xdebug mysql-client php-pear ssl-cert"
 ));
 
         newScript(INSTALLING)
