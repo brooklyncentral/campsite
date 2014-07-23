@@ -38,6 +38,7 @@ services:
   id: api
   name: "API"
   brooklyn.config:
+    campsite.webapp: $brooklyn:component("campsite")
     databaseHost: $brooklyn:component("mysql").attributeWhenReady("host.name")
     databasePort: $brooklyn:component("mysql").attributeWhenReady("mysql.port")
     databaseUser: "campsite"

@@ -21,7 +21,7 @@ services:
   name: "Campsite Cluster"
   brooklyn.config:
     initialSize: 2
-    proxy.http.port: "8080"
+    proxy.http.port: "8080+"
     memberSpec:
       $brooklyn:entitySpec:
         type: brooklyn.campsite.entity.CampsiteWebapp
@@ -29,7 +29,7 @@ services:
           provisioningProperties:
             os64bit: true
             minRam: 7000
-          httpPort: "80"
+          httpPort: 80
           objectStorage: AWSObjectStorage
           queueService: RabbitMQ
           s3AccessKey: "XXXX"
@@ -42,10 +42,13 @@ services:
           databasePassword: "p4ssw0rd"
           rabbitHost: $brooklyn:component("rabbit").attributeWhenReady("host.name")
           rabbitPort: $brooklyn:component("rabbit").attributeWhenReady("amqp.port")
+          domainName: $brooklyn:component("GLOBAL", "nginx").attributeWhenReady("host.name")
     controlleddynamicwebappcluster.controllerSpec:
       $brooklyn:entitySpec:
         type: brooklyn.entity.proxy.nginx.NginxController
-        sticky: true
+        id: nginx
+        brooklyn.config:
+          sticky: true
 - serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
   name: "API"
