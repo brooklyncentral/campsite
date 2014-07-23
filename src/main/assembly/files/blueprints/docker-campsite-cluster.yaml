@@ -1,7 +1,7 @@
 # Copyright 2014 by Cloudsoft Corporation Limited
 
-id: campsite
-name: "Campsite Application"
+id: campsite-docker-cluster-application
+name: "Campsite Docker Cluster Application"
 origin: "http://github.com/borooklyncentral/campsite/"
 locations:
 - my-docker-cloud
@@ -11,9 +11,6 @@ services:
   name: "Database"
   brooklyn.config:
     creationScriptUrl: classpath://brooklyn/campsite/create-campsite-user.sql
-- serviceType: brooklyn.entity.messaging.rabbit.RabbitBroker
-  id: rabbit
-  name: "Queue"
 - serviceType: brooklyn.entity.webapp.ControlledDynamicWebAppCluster
   id: campsite-cluster
   name: "Campsite Cluster"
@@ -26,7 +23,7 @@ services:
         brooklyn.config:
           httpPort: 80
           objectStorage: AWSObjectStorage
-          queueService: RabbitMQ
+          queueService: AWS_SQS
           s3AccessKey: "XXXX"
           s3SecretKey: "XXXXXXXX"
           s3BucketName: "campsite-public"
@@ -34,7 +31,6 @@ services:
           databaseHostAndPort: $brooklyn:component("mysql").attributeWhenReady("mapped.mysql.port")
           databaseUser: "campsite"
           databasePassword: "p4ssw0rd"
-          rabbitHostAndPort: $brooklyn:component("rabbit").attributeWhenReady("mapped.amqp.port")
           domainName: $brooklyn:component("GLOBAL", "nginx").attributeWhenReady("host.name")
     controlleddynamicwebappcluster.webClusterSpec:
       $brooklyn:entitySpec:

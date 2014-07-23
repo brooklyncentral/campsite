@@ -33,7 +33,7 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
     public void init() {
         super.init();
 
-        setAttribute(CLUSTERED, getParent() instanceof DynamicWebAppCluster);
+        setAttribute(CLUSTERED, getParent().getEntityType().getName().endsWith("Cluster"));
         setAttribute(FIRST, semaphore.tryAcquire(1));
     }
 

@@ -1,6 +1,6 @@
 # Copyright 2014 by Cloudsoft Corporation Limited
 
-id: campsite
+id: campsite-application
 name: "Campsite Application"
 origin: "http://github.com/borooklyncentral/campsite/"
 locations:
