@@ -45,6 +45,7 @@ services:
     controlleddynamicwebappcluster.controllerSpec:
       $brooklyn:entitySpec:
         type: brooklyn.entity.proxy.nginx.NginxController
+        sticky: true
 - serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
   name: "API"

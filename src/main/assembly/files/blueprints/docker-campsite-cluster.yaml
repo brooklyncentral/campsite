@@ -46,6 +46,7 @@ services:
       $brooklyn:entitySpec:
         type: brooklyn.entity.proxy.nginx.NginxController
         brooklyn.config:
+          sticky: true
           member.sensor.hostandport: "mapped.http.port"
 - serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
