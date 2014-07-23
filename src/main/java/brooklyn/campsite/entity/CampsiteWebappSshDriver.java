@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import brooklyn.entity.Entity;
 import brooklyn.entity.basic.AbstractSoftwareProcessSshDriver;
 import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.basic.EntityLocal;
 import brooklyn.location.basic.SshMachineLocation;
+import brooklyn.util.collections.MutableList;
 import brooklyn.util.collections.MutableMap;
 import brooklyn.util.file.ArchiveUtils;
 import brooklyn.util.net.Networking;
@@ -20,6 +22,7 @@ import brooklyn.util.text.Strings;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
 
@@ -94,29 +97,35 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
         copyTemplate(entity.getConfig(CampsiteWebapp.PARAMETERS_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "parameters.ini"));
         copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost"));
 
+        List<String> commands = MutableList.of(
+                BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost"), "/etc/apache2/sites-available/campsite")),
+                BashCommands.sudo("a2ensite campsite"),
+                BashCommands.sudo("a2dissite default"),
+                "cd campsite",
+                "mkdir app/cache",
+                "chmod 777 app/cache",
+                "export ENV=prod",
+                "php bin/vendors install", // XXX hack due to unreliable git clone
+                "php bin/vendors install");
+
+        Boolean first = getEntity().getAttribute(CampsiteWebapp.FIRST);
+        if (first) {
+            commands.addAll(MutableList.of(
+                    "php app/console doctrine:database:create",
+                    "php app/console doctrine:mig:mig --no-interaction",
+                    "php app/console doctrine:database:create --connection=acl --env=prod",
+                    "php app/console init:acl --env=prod",
+                    "./misc_scripts/first_time_setup.sh",
+                    "php app/console themes:install web --symlink",
+                    "php app/console assets:install web --symlink",
+                    "php app/console assetic:dump --env=prod --no-debug",
+                    "./misc_scripts/updateFeedbackTables.sh"));
+        }
+        commands.add("php app/console cache:clear --env=prod --no-debug --no-warmup");
 
         newScript(CUSTOMIZING)
                 .updateTaskAndFailOnNonZeroResultCode()
-                .body.append(
-                        BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost"), "/etc/apache2/sites-available/campsite")),
-                        BashCommands.sudo("a2ensite campsite"),
-                        BashCommands.sudo("a2dissite default"),
-                        "cd campsite",
-                        "mkdir app/cache",
-                        "chmod 777 app/cache",
-                        "export ENV=prod",
-                        "php bin/vendors install",
-                        "php bin/vendors install", // XXX hack due to unreliable git clone
-                        "php app/console doctrine:database:create",
-                        "php app/console doctrine:mig:mig --no-interaction",
-                        "php app/console doctrine:database:create --connection=acl --env=prod",
-                        "php app/console init:acl --env=prod",
-                        "./misc_scripts/first_time_setup.sh",
-                        "php app/console themes:install web --symlink",
-                        "php app/console assets:install web --symlink",
-                        "php app/console assetic:dump --env=prod --no-debug",
-                        "php app/console cache:clear --env=prod --no-debug --no-warmup",
-                        "./misc_scripts/updateFeedbackTables.sh")
+                .body.append(commands)
                 .execute();
     }
 

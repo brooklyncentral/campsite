@@ -41,6 +41,9 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
     @SetFromFlag("domainName")
     ConfigKey<String> SITE_DOMAIN_NAME = ConfigKeys.newStringConfigKey("campsite.domainName", "Campsite site domain name", "campsite.org");
 
+    AttributeSensor<Boolean> CLUSTERED = Sensors.newBooleanSensor("campsite.webapp.clustered", "Set if this is a clustered Campsite webapp");
+    AttributeSensor<Boolean> FIRST = Sensors.newBooleanSensor("campsite.webapp.first", "Set if this is the first Campsite webapp in a cluster");
+
     String getSiteDomainName();
 
 }

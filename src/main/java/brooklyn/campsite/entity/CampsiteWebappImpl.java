@@ -4,10 +4,12 @@
 package brooklyn.campsite.entity;
 
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import org.jclouds.compute.domain.OsFamily;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
+import brooklyn.entity.group.DynamicCluster;
 import brooklyn.entity.webapp.WebAppServiceConstants;
 import brooklyn.entity.webapp.WebAppServiceMethods;
 import brooklyn.event.feed.http.HttpFeed;
@@ -24,6 +26,16 @@ import com.google.common.net.HostAndPort;
 public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteWebapp {
 
     private transient HttpFeed httpFeed;
+
+    private static final Semaphore semaphore = new Semaphore(1);
+
+    @Override
+    public void init() {
+        super.init();
+
+        setAttribute(CLUSTERED, getParent() instanceof DynamicCluster);
+        setAttribute(FIRST, semaphore.tryAcquire(1));
+    }
 
     @Override
     public Class getDriverInterface() {
