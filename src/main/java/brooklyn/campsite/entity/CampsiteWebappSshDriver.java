@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import brooklyn.entity.Entity;
 import brooklyn.entity.basic.AbstractSoftwareProcessSshDriver;
 import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.basic.EntityLocal;
@@ -22,7 +21,6 @@ import brooklyn.util.text.Strings;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
 
@@ -57,7 +55,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
             throw new IllegalStateException("At least one of Git or archive URL must be set");
         }
 
-        commands.add(BashCommands.installPackage("git-core apache2 libapache2-mod-php5 php5-intl php-apc php5-curl php5-gd php5-mysql php5-mcrypt memcached php5-memcache php5-memcached php5-sqlite ftp-upload ncurses-term php5-xdebug mysql-client php-pear"
+        commands.add(BashCommands.installPackage("nc git-core apache2 libapache2-mod-php5 php5-intl php-apc php5-curl php5-gd php5-mysql php5-mcrypt memcached php5-memcache php5-memcached php5-sqlite ftp-upload ncurses-term php5-xdebug mysql-client php-pear ssl-cert"
 ));
 
         newScript(INSTALLING)
@@ -96,10 +94,13 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
 
         copyTemplate(entity.getConfig(CampsiteWebapp.PARAMETERS_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "parameters.ini"));
         copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost"));
+        copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_SSL_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost.ssl"));
 
         List<String> commands = MutableList.of(
                 BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost"), "/etc/apache2/sites-available/campsite")),
+                BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost.ssl"), "/etc/apache2/sites-available/campsite.ssl")),
                 BashCommands.sudo("a2ensite campsite"),
+                BashCommands.sudo("a2ensite campsite.ssl"),
                 BashCommands.sudo("a2dissite default"),
                 "cd campsite",
                 "mkdir app/cache",
