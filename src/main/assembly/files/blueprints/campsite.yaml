@@ -34,7 +34,7 @@ services:
     databasePassword: "p4ssw0rd"
     rabbitHost: component("rabbit").attributeWhenReady("host.name")
     rabbitPort: component("rabbit").attributeWhenReady("amqp.port")
-- serviceType: brooklyn.campsite.CampsiteWebapp
+- serviceType: brooklyn.campsite.CampsiteApi
   id: api
   name: "API"
   brooklyn.config:
