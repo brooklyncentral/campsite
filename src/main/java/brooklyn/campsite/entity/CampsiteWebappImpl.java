@@ -9,7 +9,7 @@ import java.util.concurrent.Semaphore;
 import org.jclouds.compute.domain.OsFamily;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
-import brooklyn.entity.group.DynamicCluster;
+import brooklyn.entity.webapp.DynamicWebAppCluster;
 import brooklyn.entity.webapp.WebAppServiceConstants;
 import brooklyn.entity.webapp.WebAppServiceMethods;
 import brooklyn.event.feed.http.HttpFeed;
@@ -33,7 +33,7 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
     public void init() {
         super.init();
 
-        setAttribute(CLUSTERED, getParent() instanceof DynamicCluster);
+        setAttribute(CLUSTERED, getParent() instanceof DynamicWebAppCluster);
         setAttribute(FIRST, semaphore.tryAcquire(1));
     }
 
