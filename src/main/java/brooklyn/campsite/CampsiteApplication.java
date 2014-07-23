@@ -26,7 +26,7 @@ import brooklyn.util.collections.MutableMap;
  */
 @Catalog(name="Campsite",
         description="Campsite Application.",
-        iconUrl="classpath://logo-campsite.png")
+        iconUrl="classpath://campsite-logo.png")
 public class CampsiteApplication extends AbstractApplication implements StartableApplication {
 
     @CatalogConfig(label ="Object storage (HpObjectStorage or AWSObjectStorage)", priority = 62)

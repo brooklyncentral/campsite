@@ -102,6 +102,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                         BashCommands.sudo("a2dissite default"),
                         "cd campsite",
                         "mkdir app/cache",
+                        "chmod 777 app/cache",
                         "export ENV=prod",
                         "php bin/vendors install",
                         "php bin/vendors install", // XXX hack due to unreliable git clone
@@ -114,8 +115,6 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                         "php app/console assets:install web --symlink",
                         "php app/console assetic:dump --env=prod --no-debug",
                         "php app/console cache:clear --env=prod --no-debug --no-warmup",
-                        "mkdir app/cache/prod",
-                        "chmod 777 app/cache.prod",
                         "./misc_scripts/updateFeedbackTables.sh")
                 .execute();
     }
