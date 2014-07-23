@@ -116,7 +116,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                     "php app/console doctrine:mig:mig --no-interaction",
                     "php app/console doctrine:database:create --connection=acl --env=prod",
                     "php app/console init:acl --env=prod",
-                    "./misc_scripts/first_time_setup.sh",
+                    BashCommands.ok("./misc_scripts/first_time_setup.sh"), // XXX fails in Clocker
                     "php app/console themes:install web --symlink",
                     "php app/console assets:install web --symlink",
                     "php app/console assetic:dump --env=prod --no-debug",

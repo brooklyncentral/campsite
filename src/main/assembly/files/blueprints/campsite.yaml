@@ -22,6 +22,7 @@ services:
       os64bit: true
       minRam: 7000
     httpPort: 80
+    httpsPort: 80
     objectStorage: AWSObjectStorage
     queueService: RabbitMQ
     s3AccessKey: "XXXX"
