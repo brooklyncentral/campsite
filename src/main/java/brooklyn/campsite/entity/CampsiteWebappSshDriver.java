@@ -15,7 +15,6 @@ import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.basic.EntityLocal;
 import brooklyn.entity.software.SshEffectorTasks;
 import brooklyn.entity.webapp.WebAppService;
-import brooklyn.location.access.BrooklynAccessUtils;
 import brooklyn.location.basic.SshMachineLocation;
 import brooklyn.util.collections.MutableList;
 import brooklyn.util.collections.MutableMap;
@@ -99,8 +98,10 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
             throw new IllegalStateException("At least one of Git or archive URL must be set");
         }
 
-        commands.add(BashCommands.installPackage("nc git-core apache2 libapache2-mod-php5 php5-intl php-apc php5-curl php5-gd php5-mysql php5-mcrypt memcached php5-memcache php5-memcached php5-sqlite ftp-upload ncurses-term php5-xdebug mysql-client php-pear ssl-cert"
-));
+        // Install packages (APT only)
+        commands.add(BashCommands.installPackage("netcat git-core apache2 libapache2-mod-php5 php5-intl php-apc php5-curl " +
+                "php5-gd php5-mysql php5-mcrypt memcached php5-memcache php5-memcached php5-sqlite " +
+                "ftp-upload ncurses-term php5-xdebug mysql-client php-pear ssl-cert"));
 
         newScript(INSTALLING)
                 .body.append(commands)
@@ -152,6 +153,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                 "php bin/vendors install", // XXX hack due to unreliable git clone
                 "php bin/vendors install");
 
+        // Configure database on first server only
         Boolean first = getEntity().getAttribute(CampsiteWebapp.FIRST);
         if (first) {
             commands.addAll(MutableList.of(
@@ -160,18 +162,21 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                     "php app/console doctrine:database:create --connection=acl --env=prod",
                     "php app/console init:acl --env=prod",
                     BashCommands.ok("./misc_scripts/first_time_setup.sh"), // FIXME fails in Clocker
-                    "php app/console themes:install web --symlink",
-                    "php app/console assets:install web --symlink",
                     "php app/console assetic:dump --env=prod --no-debug",
-                    "php app/console cache:clear -env=prod --no-debug",
                     "./misc_scripts/updateFeedbackTables.sh"));
         }
+
+        // Install themes
+        commands.addAll(MutableList.of(
+                "php app/console themes:install web --symlink",
+                "php app/console assets:install web --symlink"));
 
         newScript(MutableMap.of(DEBUG, true), CUSTOMIZING)
                 .updateTaskAndFailOnNonZeroResultCode()
                 .body.append(commands)
                 .execute();
 
+        // Setup cache
         ProcessTaskWrapper<Integer> task = SshEffectorTasks.ssh(
                         "cd " + getBaseDir(),
                         BashCommands.sudo("rm -rf app/cache/*"),
