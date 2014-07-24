@@ -3,6 +3,8 @@
  */
 package brooklyn.campsite.entity;
 
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +12,7 @@ import java.util.Set;
 import brooklyn.entity.basic.AbstractSoftwareProcessSshDriver;
 import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.basic.EntityLocal;
+import brooklyn.entity.software.SshEffectorTasks;
 import brooklyn.location.basic.SshMachineLocation;
 import brooklyn.util.collections.MutableList;
 import brooklyn.util.collections.MutableMap;
@@ -17,6 +20,8 @@ import brooklyn.util.file.ArchiveUtils;
 import brooklyn.util.net.Networking;
 import brooklyn.util.os.Os;
 import brooklyn.util.ssh.BashCommands;
+import brooklyn.util.task.DynamicTasks;
+import brooklyn.util.task.system.ProcessTaskWrapper;
 import brooklyn.util.text.Strings;
 
 import com.google.common.collect.ImmutableMap;
@@ -111,6 +116,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                 BashCommands.sudo("a2ensite campsite"),
                 BashCommands.sudo("a2ensite campsite.ssl"),
                 BashCommands.sudo("a2dissite default"),
+                BashCommands.sudo("a2enmod rewrite"),
                 "cd campsite",
                 "mkdir app/cache",
                 "chmod 777 app/cache",
@@ -125,18 +131,27 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                     "php app/console doctrine:mig:mig --no-interaction",
                     "php app/console doctrine:database:create --connection=acl --env=prod",
                     "php app/console init:acl --env=prod",
-                    BashCommands.ok("./misc_scripts/first_time_setup.sh"), // XXX fails in Clocker
+                    BashCommands.ok("./misc_scripts/first_time_setup.sh"), // FIXME fails in Clocker
                     "php app/console themes:install web --symlink",
                     "php app/console assets:install web --symlink",
-                    BashCommands.ok("php app/console assetic:dump --env=prod --no-debug"), // XXX fails in Clocker
+                    "php app/console assetic:dump --env=prod --no-debug",
+                    "php app/console cache:clear -env=prod --no-debug",
                     "./misc_scripts/updateFeedbackTables.sh"));
         }
-        commands.add("php app/console cache:clear --env=prod --no-debug --no-warmup");
 
         newScript(MutableMap.of(DEBUG, true), CUSTOMIZING)
                 .updateTaskAndFailOnNonZeroResultCode()
                 .body.append(commands)
                 .execute();
+
+        ProcessTaskWrapper<Integer> task = SshEffectorTasks.ssh(
+                        "cd " + getBaseDir(),
+                        BashCommands.sudo("rm -rf app/cache/*"),
+                        "php app/console cache:clear --env=prod --no-debug")
+                .machine(getMachine())
+                .summary("Clear and warm up cache")
+                .newTask();
+        DynamicTasks.queueIfPossible(task).orSubmitAsync(getEntity());
     }
 
     @Override
