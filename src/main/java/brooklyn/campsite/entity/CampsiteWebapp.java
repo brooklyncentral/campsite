@@ -32,12 +32,12 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
 
     @SetFromFlag("phpunitTemplate")
     AttributeSensorAndConfigKey<String, String> PHPUNIT_XML_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
-            "campsite.parameters.url", "Campsite PHP configuration XML template file (in freemarker format)", 
+            "campsite.phpunit.url", "Campsite PHP configuration XML template file (in freemarker format)", 
             "classpath://brooklyn/campsite/phpunit.xml");
 
     @SetFromFlag("configServerTemplate")
     AttributeSensorAndConfigKey<String, String> CONFIG_SERVER_YML_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
-            "campsite.parameters.url", "Campsite config_server.yml template file (in freemarker format)", 
+            "campsite.configServer.url", "Campsite config_server.yml template file (in freemarker format)", 
             "classpath://brooklyn/campsite/config_server.yml");
 
     @SetFromFlag("vhostTemplate")

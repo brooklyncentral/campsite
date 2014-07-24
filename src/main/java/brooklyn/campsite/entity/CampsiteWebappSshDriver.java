@@ -92,7 +92,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                 .body.append(
                         String.format("cp -R %s %s", Os.mergePaths(getInstallDir(), "spoutlet-master"), getBaseDir()),
                         String.format("sed -i.bak " +
-                                "-e 's/campsite\\.local/%s/g' " +
+                                "-e 's/campsite\\.org/%s/g' " +
                                 "-e 's/localhost 11211/%s %d/g' " +
                                 Os.mergePaths(getBaseDir(), "misc_scripts", "first_time_setup.sh"),
                                         getEntity().getConfig(CampsiteWebapp.SITE_DOMAIN_NAME), getMemcachedHost(), getMemcachedPort()),
