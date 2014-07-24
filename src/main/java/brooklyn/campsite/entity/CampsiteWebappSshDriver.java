@@ -92,7 +92,10 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                                 "/etc/php5/apache2/php.ini", Strings.replaceAll(getEntity().getConfig(CampsiteWebapp.TIMEZONE), "/", "\\/"))))
                 .execute();
 
-        copyTemplate(entity.getConfig(CampsiteWebapp.PARAMETERS_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "parameters.ini"));
+        copyTemplate(entity.getConfig(CampsiteWebapp.PARAMETERS_INI_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "parameters.ini"));
+        copyTemplate(entity.getConfig(CampsiteWebapp.CONFIG_SERVER_YML_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "config_server.yml"));
+        copyTemplate(entity.getConfig(CampsiteWebapp.PHPUNIT_XML_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "phpunit.xml"));
+
         copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost"));
         copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_SSL_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost.ssl"));
 
@@ -119,12 +122,12 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                     BashCommands.ok("./misc_scripts/first_time_setup.sh"), // XXX fails in Clocker
                     "php app/console themes:install web --symlink",
                     "php app/console assets:install web --symlink",
-                    "php app/console assetic:dump --env=prod --no-debug",
+                    BashCommands.ok("php app/console assetic:dump --env=prod --no-debug"), // XXX fails in Clocker
                     "./misc_scripts/updateFeedbackTables.sh"));
         }
         commands.add("php app/console cache:clear --env=prod --no-debug --no-warmup");
 
-        newScript(CUSTOMIZING)
+        newScript(MutableMap.of(DEBUG, true), CUSTOMIZING)
                 .updateTaskAndFailOnNonZeroResultCode()
                 .body.append(commands)
                 .execute();
@@ -253,6 +256,11 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
     }
 
     @Override
+    public String getEmailService() {
+        return getEntity().getConfig(CampsiteConfig.EMAIL_SERVICE);
+    }
+
+    @Override
     public String getSendgridUsername() {
         return getEntity().getConfig(CampsiteConfig.SENDGRID_USER);
     }
@@ -269,9 +277,9 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
 
     @Override
     public HostAndPort getRabbitHostAndPort() {
-        String databaseHostAndPort = getEntity().getConfig(CampsiteConfig.RABBIT_HOST_AND_PORT);
-        if (Strings.isNonBlank(databaseHostAndPort)) {
-            return HostAndPort.fromString(databaseHostAndPort);
+        String rabbitHostAndPort = getEntity().getConfig(CampsiteConfig.RABBIT_HOST_AND_PORT);
+        if (Strings.isNonBlank(rabbitHostAndPort)) {
+            return HostAndPort.fromString(rabbitHostAndPort);
         } else {
             return null;
         }
@@ -305,6 +313,36 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
     @Override
     public String getRabbitPassword() {
         return getEntity().getConfig(CampsiteConfig.RABBIT_PASSWORD);
+    }
+
+    @Override
+    public HostAndPort getMemcachedHostAndPort() {
+        String memcachedHostAndPort = getEntity().getConfig(CampsiteConfig.MEMCACHED_HOST_AND_PORT);
+        if (Strings.isNonBlank(memcachedHostAndPort)) {
+            return HostAndPort.fromString(memcachedHostAndPort);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String getMemcachedHost() {
+        HostAndPort endpoint = getMemcachedHostAndPort();
+        if (endpoint != null) {
+            return endpoint.getHostText();
+        } else {
+            return getEntity().getConfig(CampsiteConfig.MEMCACHED_HOST);
+        }
+    }
+
+    @Override
+    public Integer getMemcachedPort() {
+        HostAndPort endpoint = getMemcachedHostAndPort();
+        if (endpoint != null) {
+            return endpoint.getPort();
+        } else {
+            return getEntity().getConfig(CampsiteConfig.MEMCACHED_PORT);
+        }
     }
 
 }

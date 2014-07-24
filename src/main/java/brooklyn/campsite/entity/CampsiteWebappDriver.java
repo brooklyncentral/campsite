@@ -26,6 +26,7 @@ public interface CampsiteWebappDriver extends SoftwareProcessDriver {
     String getHpcloudAccessKey();
     String getHpcloudSecretKey();
     String getHpcloudTenantId();
+    String getEmailService();
     String getSendgridUsername();
     String getSendgridPassword();
     String getQueueService();
@@ -34,5 +35,8 @@ public interface CampsiteWebappDriver extends SoftwareProcessDriver {
     Integer getRabbitPort();
     String getRabbitUser();
     String getRabbitPassword();
+    HostAndPort getMemcachedHostAndPort();
+    String getMemcachedHost();
+    Integer getMemcachedPort();
 
 }

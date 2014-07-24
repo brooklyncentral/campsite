@@ -33,6 +33,7 @@ services:
           httpsPort: 80
           objectStorage: AWSObjectStorage
           queueService: RabbitMQ
+          emailService: AWS_SES
           s3AccessKey: "XXXX"
           s3SecretKey: "XXXXXXXX"
           s3BucketName: "campsite-public"

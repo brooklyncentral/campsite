@@ -37,7 +37,7 @@ public interface CampsiteConfig {
     ConfigKey<String> RECAPTCHA_PRIVATE_KEY = ConfigKeys.newStringConfigKey("campsite.recaptcha.privateKey", "Re-Captcha private key", "");
 
     @SetFromFlag("objectStorage")
-    ConfigKey<String> OBJECT_STORAGE = ConfigKeys.newStringConfigKey("campsite.objectStorage", "Object storage (HpObjectStorage or AWSObjectStorage)", "AWSObjectStorage");
+    ConfigKey<String> OBJECT_STORAGE = ConfigKeys.newStringConfigKey("campsite.object.storage", "Object storage (HpObjectStorage or AWSObjectStorage)", "AWSObjectStorage");
 
     @SetFromFlag("s3AccessKey")
     ConfigKey<String> S3_ACCESS_KEY = ConfigKeys.newStringConfigKey("campsite.s3.accessKey", "S3 access key", "");
@@ -60,6 +60,9 @@ public interface CampsiteConfig {
     @SetFromFlag("hpcloudTenantId")
     ConfigKey<String> HP_CLOUD_TENANT_ID = ConfigKeys.newStringConfigKey("campsite.hpcloud.tenantId", "HP Cloud tenant ID", "");
 
+    @SetFromFlag("emailService")
+    ConfigKey<String> EMAIL_SERVICE = ConfigKeys.newStringConfigKey("campsite.email.service", "Email service (SendGrid or AWS_SES)", "AWS_SES");
+
     @SetFromFlag("sendgridUser")
     ConfigKey<String> SENDGRID_USER = ConfigKeys.newStringConfigKey("campsite.sendgrid.user", "SendGrid user", "");
 
@@ -67,7 +70,7 @@ public interface CampsiteConfig {
     ConfigKey<String> SENDGRID_PASSWORD = ConfigKeys.newStringConfigKey("campsite.sendgrid.password", "SendGrid password", "");
 
     @SetFromFlag("queueService")
-    ConfigKey<String> QUEUE_SERVICE = ConfigKeys.newStringConfigKey("campsite.queueService", "Queue service (RabbitMQ, AWS_SQS or HPCloud)", "AWS_SQS");
+    ConfigKey<String> QUEUE_SERVICE = ConfigKeys.newStringConfigKey("campsite.queue.service", "Queue service (RabbitMQ, AWS_SQS or HPCloud)", "AWS_SQS");
 
     @SetFromFlag("rabbitHostAndPort")
     ConfigKey<String> RABBIT_HOST_AND_PORT = ConfigKeys.newStringConfigKey("campsite.rabbit.hostandport", "RabbitMQ hostname and port number");
@@ -83,5 +86,15 @@ public interface CampsiteConfig {
 
     @SetFromFlag("rabbitPassword")
     ConfigKey<String> RABBIT_PASSWORD = ConfigKeys.newStringConfigKey("campsite.rabbit.password", "RabbitMQ password", "");
+
+    @SetFromFlag("memcachedHostAndPort")
+    ConfigKey<String> MEMCACHED_HOST_AND_PORT = ConfigKeys.newStringConfigKey("campsite.memcached.hostandport", "Memcached hostname and port number");
+
+    @SetFromFlag("memcachedHost")
+    ConfigKey<String> MEMCACHED_HOST = ConfigKeys.newStringConfigKey("campsite.memcached.host", "Memcached hostname", "localhost");
+
+    @SetFromFlag("memcachedPort")
+    ConfigKey<Integer> MEMCACHED_PORT = ConfigKeys.newIntegerConfigKey("campsite.memcached.port", "Memcached port", 11211);
+
 
 }
