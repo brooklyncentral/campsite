@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import org.jclouds.compute.domain.OsFamily;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
-import brooklyn.entity.webapp.WebAppServiceConstants;
 import brooklyn.entity.webapp.WebAppServiceMethods;
 import brooklyn.event.feed.http.HttpFeed;
 import brooklyn.event.feed.http.HttpPollConfig;
@@ -24,9 +25,10 @@ import com.google.common.net.HostAndPort;
 
 public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteWebapp {
 
-    private transient HttpFeed httpFeed;
-
+    private static final Logger LOG = LoggerFactory.getLogger(CampsiteWebapp.class);
     private static final Semaphore semaphore = new Semaphore(1);
+
+    private transient HttpFeed httpFeed;
 
     @Override
     public void init() {
@@ -53,7 +55,8 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
 
         HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(this, getAttribute(HTTP_PORT));
         String webappUrl = String.format("http://%s:%d/", accessible.getHostText(), accessible.getPort());
-        setAttribute(WebAppServiceConstants.ROOT_URL, webappUrl);
+        LOG.info("Connecting to {}", webappUrl);
+
         httpFeed = HttpFeed.builder()
                 .entity(this)
                 .baseUri(webappUrl)
@@ -75,6 +78,7 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
     @Override
     protected void doStop() {
         super.doStop();
+
         setAttribute(REQUESTS_PER_SECOND_LAST, 0D);
         setAttribute(REQUESTS_PER_SECOND_IN_WINDOW, 0D);
     }

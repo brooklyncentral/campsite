@@ -9,6 +9,10 @@ import brooklyn.entity.basic.SoftwareProcessDriver;
 
 public interface CampsiteWebappDriver extends SoftwareProcessDriver {
 
+    String getBaseDir();
+    Integer getHttpPort();
+    Integer getHttpsPort();
+
     HostAndPort getDatabaseHostAndPort();
     String getDatabaseHost();
     Integer getDatabasePort();

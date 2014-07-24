@@ -38,4 +38,6 @@ public interface NodeJsWebAppService extends SoftwareProcess, WebAppService {
 
     ConfigKey<String> SERVICE_UP_PATH = ConfigKeys.newStringConfigKey("nodejs.serviceUp.path", "Path to use when checking the NodeJS application is running", "/");
 
+    Integer getHttpPort();
+
 }

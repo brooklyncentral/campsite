@@ -1,7 +1,7 @@
 package brooklyn.entity.webapp.nodejs;
 
-import com.google.common.base.Predicates;
-import com.google.common.net.HostAndPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
 import brooklyn.entity.webapp.WebAppServiceMethods;
@@ -10,9 +10,24 @@ import brooklyn.event.feed.http.HttpPollConfig;
 import brooklyn.event.feed.http.HttpValueFunctions;
 import brooklyn.location.access.BrooklynAccessUtils;
 
+import com.google.common.base.Predicates;
+import com.google.common.net.HostAndPort;
+
 public class NodeJsWebAppServiceImpl extends SoftwareProcessImpl implements NodeJsWebAppService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(NodeJsWebAppService.class);
+
     private transient HttpFeed httpFeed;
+
+    @Override
+    public Class<?> getDriverInterface() {
+        return NodeJsWebAppDriver.class;
+    }
+
+    @Override
+    public NodeJsWebAppDriver getDriver() {
+        return (NodeJsWebAppDriver) super.getDriver();
+    }
 
     @Override
     protected void connectSensors() {
@@ -20,6 +35,8 @@ public class NodeJsWebAppServiceImpl extends SoftwareProcessImpl implements Node
 
         HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(this, getAttribute(HTTP_PORT));
         String nodeJsUrl = String.format("http://%s:%d", accessible.getHostText(), accessible.getPort());
+        LOG.info("Connecting to {}", nodeJsUrl);
+
         httpFeed = HttpFeed.builder()
                 .entity(this)
                 .baseUri(nodeJsUrl)
@@ -39,20 +56,15 @@ public class NodeJsWebAppServiceImpl extends SoftwareProcessImpl implements Node
         super.disconnectSensors();
     }
 
-    public NodeJsWebAppDriver getDriver() {
-        return (NodeJsWebAppDriver) super.getDriver();
-    }
-
     @Override
     protected void doStop() {
         super.doStop();
+
         setAttribute(REQUESTS_PER_SECOND_LAST, 0D);
         setAttribute(REQUESTS_PER_SECOND_IN_WINDOW, 0D);
     }
 
     @Override
-    public Class<?> getDriverInterface() {
-        return NodeJsWebAppDriver.class;
-    }
+    public Integer getHttpPort() { return getAttribute(HTTP_PORT); }
 
 }
