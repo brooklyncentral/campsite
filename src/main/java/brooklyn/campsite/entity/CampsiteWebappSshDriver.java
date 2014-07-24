@@ -86,10 +86,16 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                 .updateTaskAndFailOnNonZeroResultCode()
                 .body.append(
                         String.format("cp -R %s %s", Os.mergePaths(getInstallDir(), "spoutlet-master"), getBaseDir()),
+                        String.format("sed -i.bak " +
+                                "-e 's/campsite\\.local/%s/g' " +
+                                "-e 's/localhost 11211/%s %d/g' " +
+                                Os.mergePaths(getBaseDir(), "misc_scripts", "first_time_setup.sh"),
+                                        getEntity().getConfig(CampsiteWebapp.SITE_DOMAIN_NAME), getMemcachedHost(), getMemcachedPort()),
                         BashCommands.sudo(String.format("sed -i.bak " +
                                 "-e 's/date\\.timezone.*=.*$/date.timezone = \"%s\"/g' " +
                                 "-e 's/short_open_tag.*=.*$/short_open_tag = Off/g' " +
-                                "/etc/php5/apache2/php.ini", Strings.replaceAll(getEntity().getConfig(CampsiteWebapp.TIMEZONE), "/", "\\/"))))
+                                "/etc/php5/apache2/php.ini",
+                                        Strings.replaceAll(getEntity().getConfig(CampsiteWebapp.TIMEZONE), "/", "\\/"))))
                 .execute();
 
         copyTemplate(entity.getConfig(CampsiteWebapp.PARAMETERS_INI_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "parameters.ini"));
