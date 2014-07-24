@@ -3,16 +3,19 @@
  */
 package brooklyn.campsite.entity;
 
-import static java.lang.String.format;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import brooklyn.entity.basic.AbstractSoftwareProcessSshDriver;
 import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.basic.EntityLocal;
 import brooklyn.entity.software.SshEffectorTasks;
+import brooklyn.entity.webapp.WebAppService;
+import brooklyn.location.access.BrooklynAccessUtils;
 import brooklyn.location.basic.SshMachineLocation;
 import brooklyn.util.collections.MutableList;
 import brooklyn.util.collections.MutableMap;
@@ -31,6 +34,8 @@ import com.google.common.net.HostAndPort;
 
 public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver implements CampsiteWebappDriver {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CampsiteWebapp.class);
+
     public CampsiteWebappSshDriver(EntityLocal entity, SshMachineLocation machine) {
         super(entity, machine);
 
@@ -41,7 +46,41 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
         return Os.mergePaths(getBaseDir(), "logs", "console.log");
     }
 
-    public String getBaseDir() { return Os.mergePaths(getRunDir(), "campsite"); }
+    @Override
+    public String getBaseDir() {
+        return Os.mergePaths(getRunDir(), "campsite");
+    }
+
+    @Override
+    public Integer getHttpPort() {
+        return getEntity().getAttribute(Attributes.HTTP_PORT);
+    }
+
+    @Override
+    public Integer getHttpsPort() {
+        return getEntity().getAttribute(Attributes.HTTPS_PORT);
+    }
+
+    @Override
+    public void postLaunch() {
+        String rootUrl = String.format("http://%s:%d/", getHostname(), getHttpPort());
+        entity.setAttribute(WebAppService.ROOT_URL, rootUrl);
+    }
+
+    @Override
+    public Set<Integer> getPortsUsed() {
+        return ImmutableSet.<Integer>builder()
+                .addAll(super.getPortsUsed())
+                .addAll(getPortMap().values())
+                .build();
+    }
+
+    protected Map<String, Integer> getPortMap() {
+        return ImmutableMap.<String, Integer>builder()
+                .put("http", getEntity().getAttribute(Attributes.HTTP_PORT))
+                .put("https", getEntity().getAttribute(Attributes.HTTPS_PORT))
+                .build();
+    }
 
     @Override
     public void install() {
@@ -66,21 +105,6 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
         newScript(INSTALLING)
                 .body.append(commands)
                 .execute();
-    }
-
-    @Override
-    public Set<Integer> getPortsUsed() {
-        return ImmutableSet.<Integer>builder()
-                .addAll(super.getPortsUsed())
-                .addAll(getPortMap().values())
-                .build();
-    }
-
-    protected Map<String, Integer> getPortMap() {
-        return ImmutableMap.<String, Integer>builder()
-                .put("http", getEntity().getAttribute(Attributes.HTTP_PORT))
-                .put("https", getEntity().getAttribute(Attributes.HTTPS_PORT))
-                .build();
     }
 
     @Override

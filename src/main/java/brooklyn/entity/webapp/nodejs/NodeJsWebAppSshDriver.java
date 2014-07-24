@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import brooklyn.entity.basic.AbstractSoftwareProcessSshDriver;
 import brooklyn.entity.basic.Attributes;
 import brooklyn.entity.basic.SoftwareProcess;
 import brooklyn.entity.webapp.WebAppService;
-import brooklyn.location.access.BrooklynAccessUtils;
 import brooklyn.location.basic.SshMachineLocation;
 import brooklyn.util.collections.MutableList;
 import brooklyn.util.collections.MutableMap;
@@ -20,10 +22,12 @@ import brooklyn.util.text.Strings;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.net.HostAndPort;
 
 public class NodeJsWebAppSshDriver extends AbstractSoftwareProcessSshDriver implements NodeJsWebAppDriver {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NodeJsWebAppService.class);
 
     public NodeJsWebAppSshDriver(NodeJsWebAppServiceImpl entity, SshMachineLocation machine) {
         super(entity, machine);
@@ -35,23 +39,17 @@ public class NodeJsWebAppSshDriver extends AbstractSoftwareProcessSshDriver impl
 
     @Override
     public Integer getHttpPort() {
-        return entity.getAttribute(Attributes.HTTP_PORT);
-    }
-
-    protected String inferRootUrl() {
-        HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(entity, getHttpPort());
-        String rootUrl = String.format("http://%s:%d/", accessible.getHostText(), accessible.getPort());
-        return rootUrl;
+        return getEntity().getAttribute(Attributes.HTTP_PORT);
     }
 
     @Override
     public void postLaunch() {
-        String rootUrl = inferRootUrl();
+        String rootUrl = String.format("http://%s:%d/", getHostname(), getHttpPort());
         entity.setAttribute(WebAppService.ROOT_URL, rootUrl);
     }
 
     protected Map<String, Integer> getPortMap() {
-        return ImmutableMap.of("httpPort", entity.getAttribute(WebAppService.HTTP_PORT));
+        return ImmutableMap.of("http", getEntity().getAttribute(WebAppService.HTTP_PORT));
     }
 
     @Override
@@ -64,9 +62,11 @@ public class NodeJsWebAppSshDriver extends AbstractSoftwareProcessSshDriver impl
 
     @Override
     public void install() {
-        log.debug("Installing {}", getEntity());
+        List<String> packages = getEntity().getConfig(NodeJsWebAppService.NODE_PACKAGE_LIST);
+        LOG.info("Installing Node.JS {} {}", getEntity().getConfig(SoftwareProcess.SUGGESTED_VERSION), Iterables.toString(packages));
 
         List<String> commands = MutableList.<String>builder()
+                .add(BashCommands.INSTALL_CURL)
                 .add(BashCommands.ifExecutableElse0("apt-get", BashCommands.chain(
                         BashCommands.installPackage("python-software-properties python g++ make"),
                         BashCommands.sudo("add-apt-repository ppa:chris-lea/node.js"))))
@@ -75,7 +75,6 @@ public class NodeJsWebAppSshDriver extends AbstractSoftwareProcessSshDriver impl
                 .add(BashCommands.sudo("n " + getEntity().getConfig(SoftwareProcess.SUGGESTED_VERSION)))
                 .build();
 
-        List<String> packages = getEntity().getConfig(NodeJsWebAppService.NODE_PACKAGE_LIST);
         if (packages != null && packages.size() > 0) {
             commands.add(BashCommands.sudo("npm install -g " + Joiner.on(' ').join(packages)));
         }
@@ -87,7 +86,6 @@ public class NodeJsWebAppSshDriver extends AbstractSoftwareProcessSshDriver impl
 
     @Override
     public void customize() {
-        log.debug("Customising {}", getEntity());
         List<String> commands = Lists.newLinkedList();
 
         String gitRepoUrl = getEntity().getConfig(NodeJsWebAppService.APP_GIT_REPOSITORY_URL);
@@ -111,7 +109,6 @@ public class NodeJsWebAppSshDriver extends AbstractSoftwareProcessSshDriver impl
 
     @Override
     public void launch() {
-        log.debug("Launching {}", getEntity());
         List<String> commands = Lists.newLinkedList();
 
         String appName = getEntity().getConfig(NodeJsWebAppService.APP_NAME);
