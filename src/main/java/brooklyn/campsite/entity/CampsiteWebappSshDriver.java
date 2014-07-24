@@ -104,7 +104,6 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                 .execute();
 
         copyTemplate(entity.getConfig(CampsiteWebapp.PARAMETERS_INI_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "parameters.ini"));
-        copyTemplate(entity.getConfig(CampsiteWebapp.CONFIG_SERVER_YML_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "config_server.yml"));
         copyTemplate(entity.getConfig(CampsiteWebapp.PHPUNIT_XML_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "phpunit.xml"));
 
         copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost"));
