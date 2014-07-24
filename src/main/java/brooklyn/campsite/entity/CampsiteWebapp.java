@@ -26,9 +26,19 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
     AttributeSensor<String> BASE_DIR = Sensors.newStringSensor("campsite.base.dir", "Campsite base directory");
 
     @SetFromFlag("parametersTemplate")
-    AttributeSensorAndConfigKey<String, String> PARAMETERS_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
+    AttributeSensorAndConfigKey<String, String> PARAMETERS_INI_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
             "campsite.parameters.url", "Campsite parameters.ini template file (in freemarker format)", 
             "classpath://brooklyn/campsite/parameters.ini");
+
+    @SetFromFlag("phpunitTemplate")
+    AttributeSensorAndConfigKey<String, String> PHPUNIT_XML_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
+            "campsite.parameters.url", "Campsite PHP configuration XML template file (in freemarker format)", 
+            "classpath://brooklyn/campsite/phpunit.xml");
+
+    @SetFromFlag("configServerTemplate")
+    AttributeSensorAndConfigKey<String, String> CONFIG_SERVER_YML_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
+            "campsite.parameters.url", "Campsite config_server.yml template file (in freemarker format)", 
+            "classpath://brooklyn/campsite/config_server.yml");
 
     @SetFromFlag("vhostTemplate")
     AttributeSensorAndConfigKey<String, String> VHOST_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(

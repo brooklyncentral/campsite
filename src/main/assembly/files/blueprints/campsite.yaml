@@ -11,9 +11,6 @@ services:
   name: "Database"
   brooklyn.config:
     creationScriptUrl: classpath://brooklyn/campsite/create-campsite-user.sql
-- serviceType: brooklyn.entity.messaging.rabbit.RabbitBroker
-  id: rabbit
-  name: "Queue"
 - serviceType: brooklyn.campsite.entity.CampsiteWebapp
   id: campsite
   name: "Campsite"
@@ -24,7 +21,8 @@ services:
     httpPort: 80
     httpsPort: 80
     objectStorage: AWSObjectStorage
-    queueService: RabbitMQ
+    queueService: AWS_SQS
+    emailService: AWS_SES
     s3AccessKey: "XXXX"
     s3SecretKey: "XXXXXXXX"
     s3BucketName: "campsite-public"

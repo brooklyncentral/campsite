@@ -25,6 +25,7 @@ services:
           httpsPort: 443
           objectStorage: AWSObjectStorage
           queueService: AWS_SQS
+          emailService: AWS_SES
           s3AccessKey: "XXXX"
           s3SecretKey: "XXXXXXXX"
           s3BucketName: "campsite-public"

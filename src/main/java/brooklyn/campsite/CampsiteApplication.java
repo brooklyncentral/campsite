@@ -29,10 +29,12 @@ import brooklyn.util.collections.MutableMap;
         iconUrl="classpath://campsite-logo.png")
 public class CampsiteApplication extends AbstractApplication implements StartableApplication {
 
-    @CatalogConfig(label ="Object storage (HpObjectStorage or AWSObjectStorage)", priority = 62)
+    @CatalogConfig(label ="Object storage (HpObjectStorage or AWSObjectStorage)", priority = 64)
     public static final ConfigKey<String> OBJECT_STORAGE = ConfigKeys.newConfigKeyWithPrefix("catalog.", CampsiteConfig.OBJECT_STORAGE);
-    @CatalogConfig(label = "Queue service (RabbitMQ, AWS_SQS or HPCloud)", priority = 60)
+    @CatalogConfig(label = "Queue service (RabbitMQ, AWS_SQS or HPCloud)", priority = 62)
     public static final ConfigKey<String> QUEUE_SERVICE = ConfigKeys.newConfigKeyWithPrefix("catalog.", CampsiteConfig.QUEUE_SERVICE);
+    @CatalogConfig(label = "Email service (SendGrid or AWS_SES)", priority = 60)
+    public static final ConfigKey<String> EMAIL_SERVICE = ConfigKeys.newConfigKeyWithPrefix("catalog.", CampsiteConfig.EMAIL_SERVICE);
 
     @CatalogConfig(label = "Mailer user", priority = 52)
     public static final ConfigKey<String> MAILER_USER = ConfigKeys.newConfigKeyWithPrefix("catalog.", CampsiteConfig.MAILER_USER);
@@ -88,6 +90,7 @@ public class CampsiteApplication extends AbstractApplication implements Startabl
                 .configure(CampsiteConfig.HP_CLOUD_ACCESS_KEY, getConfig(HP_CLOUD_ACCESS_KEY))
                 .configure(CampsiteConfig.HP_CLOUD_SECRET_KEY, getConfig(HP_CLOUD_SECRET_KEY))
                 .configure(CampsiteConfig.HP_CLOUD_TENANT_ID, getConfig(HP_CLOUD_TENANT_ID))
+                .configure(CampsiteConfig.EMAIL_SERVICE, getConfig(EMAIL_SERVICE))
                 .configure(CampsiteConfig.SENDGRID_USER, getConfig(SENDGRID_USER))
                 .configure(CampsiteConfig.SENDGRID_PASSWORD, getConfig(SENDGRID_PASSWORD))
                 .configure(CampsiteConfig.DATABASE_HOST, attributeWhenReady(mysql, Attributes.HOSTNAME))
