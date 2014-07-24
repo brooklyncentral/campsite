@@ -22,6 +22,7 @@ services:
   brooklyn.config:
     initialSize: 2
     proxy.http.port: "8080+"
+    proxy.https.port: "8443+"
     memberSpec:
       $brooklyn:entitySpec:
         type: brooklyn.campsite.entity.CampsiteWebapp
@@ -30,7 +31,7 @@ services:
             os64bit: true
             minRam: 7000
           httpPort: 80
-          httpsPort: 80
+          httpsPort: 443
           objectStorage: AWSObjectStorage
           queueService: RabbitMQ
           emailService: AWS_SES
