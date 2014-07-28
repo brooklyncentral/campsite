@@ -42,7 +42,7 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
 
     @SetFromFlag("vhostTemplate")
     AttributeSensorAndConfigKey<String, String> VHOST_SSL_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
-            "campsite.vhost.url", "Campsite SSL vhost template file (in freemarker format)", 
+            "campsite.vhost.ssl.url", "Campsite SSL vhost template file (in freemarker format)", 
             "classpath://brooklyn/campsite/vhost.ssl");
 
     @SetFromFlag("timezone")

@@ -134,10 +134,15 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
         copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_SSL_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost.ssl"));
 
         List<String> commands = MutableList.of(
-                BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost"), "/etc/apache2/sites-available/campsite")),
+                // SSL Commands
                 BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost.ssl"), "/etc/apache2/sites-available/campsite.ssl")),
-                BashCommands.sudo("a2ensite campsite"),
                 BashCommands.sudo("a2ensite campsite.ssl"),
+                BashCommands.sudo("a2enmod ssl"),
+                BashCommands.sudo("sudo mkdir /etc/apache2/ssl"),
+                BashCommands.sudo("openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj \"/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com\" -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt"),
+                // Common commands
+                BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost"), "/etc/apache2/sites-available/campsite")),
+                BashCommands.sudo("a2ensite campsite"),
                 BashCommands.sudo("a2dissite default"),
                 BashCommands.sudo("a2enmod rewrite"),
                 "cd campsite",
