@@ -29,6 +29,7 @@ import brooklyn.util.text.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.net.HostAndPort;
 
 public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver implements CampsiteWebappDriver {
@@ -75,15 +76,21 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
     }
 
     protected Map<String, Integer> getPortMap() {
-        return ImmutableMap.<String, Integer>builder()
-                .put("http", getEntity().getAttribute(Attributes.HTTP_PORT))
-                .put("https", getEntity().getAttribute(Attributes.HTTPS_PORT))
-                .build();
+        Map<String, Integer> ports = Maps.newHashMap();
+        ports.put("http", getEntity().getAttribute(Attributes.HTTP_PORT));
+        if (isSslEnabled()) ports.put("https", getEntity().getAttribute(Attributes.HTTPS_PORT));
+        return ImmutableMap.copyOf(ports);
+    }
+
+    protected boolean isSslEnabled() {
+        return getEntity().getAttribute(WebAppService.ENABLED_PROTOCOLS).contains("https");
     }
 
     @Override
     public void install() {
         List<String> commands = Lists.newLinkedList();
+        // TODO add memcached entity
+        commands.add(BashCommands.installPackage("apache2 ssl-cert netcat git-core ftp-upload ncurses-term memcached"));
 
         String gitRepoUrl = getEntity().getConfig(CampsiteWebapp.GIT_REPOSITORY_URL);
         String archiveUrl = getEntity().getConfig(CampsiteWebapp.ARCHIVE_DOWNLOAD_URL);
@@ -98,10 +105,10 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
             throw new IllegalStateException("At least one of Git or archive URL must be set");
         }
 
-        // Install packages (APT only)
-        commands.add(BashCommands.installPackage("netcat git-core apache2 libapache2-mod-php5 php5-intl php-apc php5-curl " +
-                "php5-gd php5-mysql php5-mcrypt memcached php5-memcache php5-memcached php5-sqlite " +
-                "ftp-upload ncurses-term php5-xdebug mysql-client php-pear ssl-cert"));
+        // Install PHP (APT only) 
+        commands.add(BashCommands.ifExecutableElse0("apt-get", BashCommands.sudo("add-apt-repository ppa:ondrej/php5-oldstable")));
+        commands.add(BashCommands.installPackage("libapache2-mod-php5 php5-intl php-apc php5-curl php5-gd php5-mysql php5-mcrypt " +
+                "php5-memcache php5-memcached php5-sqlite php5-xdebug mysql-client php-pear"));
 
         newScript(INSTALLING)
                 .body.append(commands)
@@ -131,19 +138,36 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
         copyTemplate(entity.getConfig(CampsiteWebapp.PARAMETERS_INI_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "config", "parameters.ini"));
         copyTemplate(entity.getConfig(CampsiteWebapp.PHPUNIT_XML_TEMPLATE_URL), Os.mergePaths(getBaseDir(), "app", "phpunit.xml"));
 
-        copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost"));
-        copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_SSL_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost.ssl"));
+        List<String> commands = Lists.newLinkedList();
+        if (isSslEnabled()) {
+            // SSL Site
+            copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_SSL_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost.ssl"));
+            commands.add(BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost.ssl"), "/etc/apache2/sites-available/campsite.ssl")));
+            commands.add(BashCommands.sudo("mkdir -p /etc/apache2/ssl"));
+            String certificateSourceUrl = getEntity().getConfig(CampsiteWebapp.SSL_CERTIFICATE_SOURCE_URL);
+            String keySourceUrl = getEntity().getConfig(CampsiteWebapp.SSL_KEY_SOURCE_URL);
+            if (Strings.isNonBlank(certificateSourceUrl) && Strings.isNonBlank(keySourceUrl)) {
+                copyResource(certificateSourceUrl, "/etc/apache2/ssl/apache.crt");
+                copyResource(keySourceUrl, "/etc/apache2/ssl/apache.key");
+            } else {
+                // Create a temporary self-signed 'snake oil' certificate
+                commands.add(BashCommands.sudo(String.format("openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 " +
+                        "-subj \"/C=AA/ST=None/L=None/O=None/CN=%s\" " +
+                        "-keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt",
+                                getEntity().getConfig(CampsiteWebapp.SITE_DOMAIN_NAME))));
+            }
+            commands.add(BashCommands.sudo("a2ensite campsite.ssl"));
+            commands.add(BashCommands.sudo("a2enmod ssl"));
+        }
 
-        List<String> commands = MutableList.of(
-                // SSL Commands
-                BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost.ssl"), "/etc/apache2/sites-available/campsite.ssl")),
-                BashCommands.sudo("a2ensite campsite.ssl"),
-                BashCommands.sudo("a2enmod ssl"),
-                BashCommands.sudo("sudo mkdir /etc/apache2/ssl"),
-                BashCommands.sudo("openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj \"/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com\" -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt"),
-                // Common commands
+        // Campsite
+        copyTemplate(entity.getConfig(CampsiteWebapp.VHOST_TEMPLATE_URL), Os.mergePaths(getRunDir(), "vhost"));
+        commands.addAll(MutableList.of(
                 BashCommands.sudo(String.format("cp %s %s", Os.mergePaths(getRunDir(), "vhost"), "/etc/apache2/sites-available/campsite")),
-                BashCommands.sudo("a2ensite campsite"),
+                BashCommands.sudo("a2ensite campsite")));
+
+        // Common commands
+        commands.addAll(MutableList.of(
                 BashCommands.sudo("a2dissite default"),
                 BashCommands.sudo("a2enmod rewrite"),
                 "cd campsite",
@@ -151,7 +175,7 @@ public class CampsiteWebappSshDriver extends AbstractSoftwareProcessSshDriver im
                 "chmod 777 app/cache",
                 "export ENV=prod",
                 "php bin/vendors install", // XXX hack due to unreliable git clone
-                "php bin/vendors install");
+                "php bin/vendors install"));
 
         // Configure database on first server only
         Boolean first = getEntity().getAttribute(CampsiteWebapp.FIRST);

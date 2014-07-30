@@ -40,10 +40,16 @@ public interface CampsiteWebapp extends SoftwareProcess, WebAppService, Campsite
             "campsite.vhost.url", "Campsite vhost template file (in freemarker format)", 
             "classpath://brooklyn/campsite/vhost");
 
-    @SetFromFlag("vhostTemplate")
+    @SetFromFlag("vhostSslTemplate")
     AttributeSensorAndConfigKey<String, String> VHOST_SSL_TEMPLATE_URL = ConfigKeys.newStringSensorAndConfigKey(
             "campsite.vhost.ssl.url", "Campsite SSL vhost template file (in freemarker format)", 
             "classpath://brooklyn/campsite/vhost.ssl");
+
+    @SetFromFlag("certificateSourceUrl")
+    ConfigKey<String> SSL_CERTIFICATE_SOURCE_URL = ConfigKeys.newStringConfigKey("campsite.ssl.certificate.url", "Source URL for the SSL certificate. Default is to generate a self-signed certificate.");
+
+    @SetFromFlag("keySourceUrl")
+    ConfigKey<String> SSL_KEY_SOURCE_URL = ConfigKeys.newStringConfigKey("campsite.ssl.key.url", "Source URL for the SSL key. Default is to generate a self-signed certificate.");
 
     @SetFromFlag("timezone")
     ConfigKey<String> TIMEZONE = ConfigKeys.newStringConfigKey("campsite.timezone", "Campsite site time zone", "Europe/London");

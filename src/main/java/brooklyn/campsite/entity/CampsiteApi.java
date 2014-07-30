@@ -40,8 +40,8 @@ public interface CampsiteApi extends NodeJsWebAppService {
     @SetFromFlag("databasePassword")
     ConfigKey<String> DATABASE_PASSWORD = CampsiteConfig.DATABASE_PASSWORD;
 
-    @SetFromFlag("appUser")
-    ConfigKey<String> CONFIG_JSON_TEMPLATE_URL = ConfigKeys.newStringConfigKey("campsite.api.configUrl", "The Campsite API JSON configuration (FreeMarker template URL)",
+    @SetFromFlag("configUrl")
+    ConfigKey<String> CONFIG_JSON_TEMPLATE_URL = ConfigKeys.newStringConfigKey("campsite.api.config.url", "The Campsite API JSON configuration (FreeMarker template URL)",
             "classpath://brooklyn/campsite/config_data.json");
 
 }

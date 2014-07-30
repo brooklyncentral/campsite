@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
 import brooklyn.entity.webapp.WebAppServiceMethods;
+import brooklyn.event.feed.ConfigToAttributes;
 import brooklyn.event.feed.http.HttpFeed;
 import brooklyn.event.feed.http.HttpPollConfig;
 import brooklyn.event.feed.http.HttpValueFunctions;
@@ -32,6 +33,8 @@ public class NodeJsWebAppServiceImpl extends SoftwareProcessImpl implements Node
     @Override
     protected void connectSensors() {
         super.connectSensors();
+
+        ConfigToAttributes.apply(this);
 
         HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(this, getAttribute(HTTP_PORT));
         String nodeJsUrl = String.format("http://%s:%d", accessible.getHostText(), accessible.getPort());

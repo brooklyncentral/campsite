@@ -1,8 +1,14 @@
 # Copyright 2014 by Cloudsoft Corporation Limited
+#
+# Campsite Cluster Application
+#
+# A set of VMs with a cluster of Campsite webapps, an Nginx
+# load balancer, API server, RabbitMQ broker and database.
+# Uses the "example.org" domain name for the site.
 
 id: campsite-cluster-application
 name: "Campsite Cluster Application"
-origin: "http://github.com/borooklyncentral/campsite/"
+origin: "http://github.com/brooklyncentral/campsite/"
 locations:
 - jclouds:hpcloud-compute:
     identity: tenantId:user
@@ -12,7 +18,8 @@ services:
   id: mysql
   name: "Database"
   brooklyn.config:
-    creationScriptUrl: classpath://brooklyn/campsite/create-campsite-user.sql
+    creationScriptUrl:
+      "classpath://brooklyn/campsite/create-campsite-user.sql"
 - serviceType: brooklyn.entity.messaging.rabbit.RabbitBroker
   id: rabbit
   name: "Queue"
@@ -31,7 +38,8 @@ services:
             os64bit: true
             minRam: 7000
           httpPort: 80
-          httpsPort: 443
+          webapp.enabledProtocols:
+          - "http"
           objectStorage: AWSObjectStorage
           queueService: RabbitMQ
           emailService: AWS_SES
@@ -45,13 +53,19 @@ services:
           databasePassword: "p4ssw0rd"
           rabbitHost: $brooklyn:component("rabbit").attributeWhenReady("host.name")
           rabbitPort: $brooklyn:component("rabbit").attributeWhenReady("amqp.port")
-          domainName: $brooklyn:component("GLOBAL", "nginx").attributeWhenReady("host.name")
+          domainName: $brooklyn:component("GLOBAL", "nginx").attributeWhenReady("proxy.domainName")
     controlleddynamicwebappcluster.controllerSpec:
       $brooklyn:entitySpec:
         type: brooklyn.entity.proxy.nginx.NginxController
         id: nginx
         brooklyn.config:
           sticky: true
+          domain: "example.org"
+          ssl:
+            certificateSourceUrl:
+              "classpath://server.crt"
+            keySourceUrl:
+              "classpath://server.key"
 - serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
   name: "API"

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import brooklyn.entity.basic.SoftwareProcessImpl;
 import brooklyn.entity.webapp.WebAppServiceMethods;
+import brooklyn.event.feed.ConfigToAttributes;
 import brooklyn.event.feed.http.HttpFeed;
 import brooklyn.event.feed.http.HttpPollConfig;
 import brooklyn.event.feed.http.HttpValueFunctions;
@@ -51,6 +52,7 @@ public class CampsiteWebappImpl extends SoftwareProcessImpl implements CampsiteW
     protected void connectSensors() {
         super.connectSensors();
 
+        ConfigToAttributes.apply(this);
         setAttribute(CLUSTERED, getParent().getEntityType().getName().endsWith("Cluster"));
 
         HostAndPort accessible = BrooklynAccessUtils.getBrooklynAccessibleAddress(this, getAttribute(HTTP_PORT));

@@ -3,20 +3,23 @@
 # Campsite Application
 #
 # Three VMs with the Campsite webapp, API server and database.
+# Templates for configuration files are served over HTTP from S3.
 # Uses the "example.org" domain name for the site.
 
 id: campsite-application
 name: "Campsite Application"
 origin: "http://github.com/brooklyncentral/campsite/"
 locations:
-- jclouds:aws-ec2:eu-west-1
+- jclouds:hpcloud-compute:
+    identity: tenantId:user
+    credential: password
 services:
 - serviceType: brooklyn.entity.database.mysql.MySqlNode
   id: mysql
   name: "Database"
   brooklyn.config:
     creationScriptUrl:
-      "classpath://brooklyn/campsite/create-campsite-user.sql"
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/create-campsite-user.sql"
 - serviceType: brooklyn.campsite.entity.CampsiteWebapp
   id: campsite
   name: "Campsite"
@@ -29,6 +32,14 @@ services:
     webapp.enabledProtocols:
     - "http"
     - "https"
+    parametersTemplate:
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/parameters.ini"
+    phpunitTemplate:
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/phpunit.xml"
+    vhostTemplate:
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/vhost"
+    vhostSslTemplate:
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/vhost.ssl"
     objectStorage: AWSObjectStorage
     queueService: AWS_SQS
     emailService: AWS_SES
@@ -41,10 +52,16 @@ services:
     databaseUser: "campsite"
     databasePassword: "p4ssw0rd"
     domainName: "example.org"
+    certificateSourceUrl:
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/server.crt"
+    keySourceUrl:
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/server.key"
 - serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
   name: "API"
   brooklyn.config:
+    configUrl:
+      "https://s3-eu-west-1.amazonaws.com/brooklyn-campsite/config_data.json"
     campsite.webapp: $brooklyn:component("campsite")
     databaseHost: $brooklyn:component("mysql").attributeWhenReady("host.name")
     databasePort: $brooklyn:component("mysql").attributeWhenReady("mysql.port")

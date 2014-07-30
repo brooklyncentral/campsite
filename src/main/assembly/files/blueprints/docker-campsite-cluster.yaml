@@ -1,8 +1,14 @@
 # Copyright 2014 by Cloudsoft Corporation Limited
+#
+# Campsite Docker Cluster Application
+#
+# A set of containers with a cluster of Campsite webapps, an
+# Nginx load balancer, API server and database.
+# Uses the "example.org" domain name for the site.
 
 id: campsite-docker-cluster-application
 name: "Campsite Docker Cluster Application"
-origin: "http://github.com/borooklyncentral/campsite/"
+origin: "http://github.com/brooklyncentral/campsite/"
 locations:
 - my-docker-cloud
 services:
@@ -10,19 +16,24 @@ services:
   id: mysql
   name: "Database"
   brooklyn.config:
-    creationScriptUrl: classpath://brooklyn/campsite/create-campsite-user.sql
+    creationScriptUrl:
+      "classpath://brooklyn/campsite/create-campsite-user.sql"
 - serviceType: brooklyn.entity.webapp.ControlledDynamicWebAppCluster
   id: campsite-cluster
   name: "Campsite Cluster"
   brooklyn.config:
     initialSize: 1
     proxy.http.port: "8080+"
+    proxy.https.port: "8443+"
     memberSpec:
       $brooklyn:entitySpec:
         type: brooklyn.campsite.entity.CampsiteWebapp
         brooklyn.config:
           httpPort: 80
           httpsPort: 443
+          webapp.enabledProtocols:
+          - "http"
+          - "https"
           objectStorage: AWSObjectStorage
           queueService: AWS_SQS
           emailService: AWS_SES
@@ -33,7 +44,10 @@ services:
           databaseHostAndPort: $brooklyn:component("mysql").attributeWhenReady("mapped.mysql.port")
           databaseUser: "campsite"
           databasePassword: "p4ssw0rd"
-          domainName: $brooklyn:component("GLOBAL", "nginx").attributeWhenReady("host.name")
+          domainName: $brooklyn:component("GLOBAL", "nginx").attributeWhenReady("proxy.domainName")
+          affinity.rules: |
+            NOT TYPE brooklyn.entity.proxy.nginx.NginxController
+            SAME APPLICATION
     controlleddynamicwebappcluster.webClusterSpec:
       $brooklyn:entitySpec:
         type: brooklyn.entity.webapp.DynamicWebAppCluster
@@ -46,6 +60,13 @@ services:
         type: brooklyn.entity.proxy.nginx.NginxController
         id: nginx
         brooklyn.config:
+          sticky: true
+          domain: "example.org"
+          ssl:
+            certificateSourceUrl:
+              "classpath://server.crt"
+            keySourceUrl:
+              "classpath://server.key"
           member.sensor.hostandport: "mapped.http.port"
 - serviceType: brooklyn.campsite.entity.CampsiteApi
   id: api
@@ -55,3 +76,6 @@ services:
     databaseHostAndPort: $brooklyn:component("mysql").attributeWhenReady("mapped.mysql.port")
     databaseUser: "campsite"
     databasePassword: "p4ssw0rd"
+    affinity.rules: |
+      TYPE brooklyn.entity.database.mysql.MySqlNode
+      SAME APPLICATION

@@ -4,6 +4,9 @@
 package brooklyn.campsite;
 
 import static brooklyn.event.basic.DependentConfiguration.attributeWhenReady;
+
+import java.util.Set;
+
 import brooklyn.campsite.entity.CampsiteApi;
 import brooklyn.campsite.entity.CampsiteConfig;
 import brooklyn.campsite.entity.CampsiteWebapp;
@@ -18,8 +21,12 @@ import brooklyn.entity.basic.StartableApplication;
 import brooklyn.entity.database.mysql.MySqlNode;
 import brooklyn.entity.messaging.rabbit.RabbitBroker;
 import brooklyn.entity.proxying.EntitySpec;
+import brooklyn.entity.webapp.WebAppService;
 import brooklyn.location.basic.PortRanges;
 import brooklyn.util.collections.MutableMap;
+import brooklyn.util.collections.MutableSet;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Clustered Diffusion servers.
@@ -29,7 +36,12 @@ import brooklyn.util.collections.MutableMap;
         iconUrl="classpath://campsite-logo.png")
 public class CampsiteApplication extends AbstractApplication implements StartableApplication {
 
-    @CatalogConfig(label ="Object storage (HpObjectStorage or AWSObjectStorage)", priority = 64)
+    @CatalogConfig(label = "Site domain name", priority = 72)
+    public static final ConfigKey<String> SITE_DOMAIN_NAME = ConfigKeys.newConfigKeyWithPrefix("catalog.", CampsiteWebapp.SITE_DOMAIN_NAME);
+    @CatalogConfig(label = "Use SSL", priority = 70)
+    public static final ConfigKey<Boolean> USE_HTTPS = ConfigKeys.newBooleanConfigKey("catalog.use.ssl", "Create an SSL site", true);
+
+    @CatalogConfig(label = "Object storage (HpObjectStorage or AWSObjectStorage)", priority = 64)
     public static final ConfigKey<String> OBJECT_STORAGE = ConfigKeys.newConfigKeyWithPrefix("catalog.", CampsiteConfig.OBJECT_STORAGE);
     @CatalogConfig(label = "Queue service (RabbitMQ, AWS_SQS or HPCloud)", priority = 62)
     public static final ConfigKey<String> QUEUE_SERVICE = ConfigKeys.newConfigKeyWithPrefix("catalog.", CampsiteConfig.QUEUE_SERVICE);
@@ -70,6 +82,8 @@ public class CampsiteApplication extends AbstractApplication implements Startabl
     @Override
     public void init() {
         String queueService = getConfig(QUEUE_SERVICE);
+        Set<String> protocols = MutableSet.of("http");
+        if (getConfig(USE_HTTPS)) { protocols.add("https"); }
 
         MySqlNode mysql = addChild(EntitySpec.create(MySqlNode.class)
                 .configure(MySqlNode.CREATION_SCRIPT_URL, "classpath://brooklyn/campsite/create-campsite-user.sql"));
@@ -77,6 +91,9 @@ public class CampsiteApplication extends AbstractApplication implements Startabl
         EntitySpec<CampsiteWebapp> campspec = EntitySpec.create(CampsiteWebapp.class)
                 .configure(SoftwareProcess.PROVISIONING_PROPERTIES, MutableMap.<String, Object>of("os64Bit", "true", "minRam", "7000"))
                 .configure(Attributes.HTTP_PORT, PortRanges.fromInteger(80))
+                .configure(Attributes.HTTPS_PORT, PortRanges.fromInteger(443))
+                .configure(WebAppService.ENABLED_PROTOCOLS, protocols)
+                .configure(CampsiteWebapp.SITE_DOMAIN_NAME, getConfig(SITE_DOMAIN_NAME))
                 .configure(CampsiteConfig.OBJECT_STORAGE, getConfig(OBJECT_STORAGE))
                 .configure(CampsiteConfig.QUEUE_SERVICE, getConfig(QUEUE_SERVICE))
                 .configure(CampsiteConfig.MAILER_USER, getConfig(MAILER_USER))
